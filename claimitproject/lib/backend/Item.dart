@@ -18,17 +18,22 @@ class Item {
   });
 
   // Convert JSON to Dart object
-  factory Item.fromJson(Map<String, dynamic> json) {
-    return Item(
-      name: json['name'],
-      category: json['category'],
-      color: json['color'],
-      location: json['location'],
-      description: json['description'],
-      imagePath: json['image_path'],
-      itemType: json['item_type'],
-    );
-  }
+factory Item.fromJson(Map<String, dynamic> json) {
+  String baseUrl = "http://10.0.2.2:8000";  // Change to your actual API URL if different
+
+  return Item(
+    name: json['name'] ?? '',
+    category: json['category'] ?? '',
+    color: json['color'] ?? '',
+    location: json['location'] ?? '',
+    description: json['description'] ?? '',
+    imagePath: json['image_path'] != null && json['image_path'].startsWith('/')
+        ? '$baseUrl${json['image_path']}' // Add base URL for relative paths
+        : json['image_path'] ?? '',
+    itemType: json['item_type'] ?? '',
+  );
+}
+
 
   // Convert Dart object to JSON
   Map<String, dynamic> toJson() {

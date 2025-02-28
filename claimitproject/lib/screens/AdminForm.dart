@@ -19,6 +19,7 @@ class _AdminFormState extends State<AdminForm> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Form'),
+        backgroundColor: Colors.orange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -63,11 +64,11 @@ class _AdminFormState extends State<AdminForm> {
       try {
 
 
-        final csrfResponse = await http.get(Uri.parse('http://172.20.10.5:8000/api/get_csrf_token/'));
+        final csrfResponse = await http.get(Uri.parse('http://10.0.2.2:8000/api/get_csrf_token/'));
         String csrfToken = csrfResponse.body; 
 
         final response = await http.post(
-  Uri.parse('http://172.20.10.5:8000/api/verify_admin_code/'),
+  Uri.parse('http://10.0.2.2:8000/api/verify_admin_code/'),
   headers: {
     "Content-Type": "application/json",
     "X-CSRFToken": csrfToken,  // Make sure this header is included

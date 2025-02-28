@@ -25,7 +25,7 @@ class _SignUpFormState extends State<SignUpForm> {
       _isLoading = true; // Show progress indicator
     });
 
-    var url = Uri.parse('http://172.20.10.5:8000/api/register/');
+    var url = Uri.parse('http://10.0.2.2:8000/api/register/');
     var response = await http.post(url, headers: {
       "Content-Type": "application/json"
     }, body: jsonEncode({
@@ -67,6 +67,7 @@ class _SignUpFormState extends State<SignUpForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Sign Up'),
+        backgroundColor: Colors.orange,
       ),
       body: Form(
         key: _formKey,

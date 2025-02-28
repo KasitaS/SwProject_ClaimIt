@@ -28,7 +28,7 @@ class _LoginFormState extends State<LoginForm> {
   });
 
   try {
-    final url = Uri.parse('http://172.20.10.5:8000/api/login/');
+    final url = Uri.parse('http://10.0.2.2:8000/api/login/');
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -42,11 +42,12 @@ class _LoginFormState extends State<LoginForm> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final String token = data['access'];
+      final String refresh = data['refresh'];
       final String username = data['username'];
 
       // Ensure the token and username are not null
       if (token.isNotEmpty && username.isNotEmpty) {
-        await saveToken(token);
+        await saveToken(token, refresh);
         User user = User(username: username);
 
         Navigator.pushAndRemoveUntil(
@@ -76,6 +77,7 @@ class _LoginFormState extends State<LoginForm> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text('ClaimIt KMITL: Lost and Found App'),
+        backgroundColor: Colors.orange,
       ),
       body: SingleChildScrollView(
         child: Center(
