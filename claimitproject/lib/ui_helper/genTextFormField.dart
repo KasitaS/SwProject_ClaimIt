@@ -15,7 +15,6 @@ class GetTextFormField extends StatelessWidget {
     this.icon,
     this.isObscureText = false,
     this.inputType = TextInputType.text, 
-    //String? Function(dynamic value)? validator,
   });
 
   @override
@@ -30,7 +29,7 @@ class GetTextFormField extends StatelessWidget {
           if (value == null || value.isEmpty) {
             return 'Please enter $hintName';
           }
-          // Check if the field is "Email" and validate it using the helper function
+          
           if (hintName == "Email" && !validateEmail(value)) {
             return 'Please enter a valid email';
           }

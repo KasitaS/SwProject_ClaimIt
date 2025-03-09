@@ -8,8 +8,6 @@ import '../backend/Search/CompositeSearchStrategy.dart';
 import '../backend/Search/LocationFilterStrategy.dart';
 import '../backend/Search/SearchStrategy.dart';
 
-
-
 class FoundUserItemPage extends StatefulWidget {
   const FoundUserItemPage({super.key});
 
@@ -21,7 +19,7 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
   String? selectedCategory;
   String? selectedColor;
   String? selectedLocation;
- late List<Item> filteredItems = []; // Initialize with an empty list
+  late List<Item> filteredItems = [];
 
   final List<String> categories = [
     'none',
@@ -62,7 +60,14 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Found Items'),
+        title: const Text('Found Items'),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -127,7 +132,6 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
             padding: EdgeInsets.only(right: 16),
             child: ElevatedButton(
               onPressed: () {
-                // Implement filter logic here
                 filterItems();
               },
               style: ElevatedButton.styleFrom(
@@ -146,48 +150,53 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
                 );
               },
             ),
-          ), 
+          ),
         ],
       ),
     );
   }
-
   void filterItems() async {
-    // Create your search strategies based on selected criteria
-    List<SearchStrategy> strategies = [];
+  setState(() {
+    filteredItems = [];
+  });
 
-    if (selectedCategory != 'none' &&
-        selectedCategory != null &&
-        selectedCategory!.isNotEmpty) {
-      strategies.add(CategoryFilterStrategy(selectedCategory!, 'Found'));
-    }
+  List<SearchStrategy> strategies = [];
 
-    // Uncomment to enable color filtering if required
-    
-    if (selectedColor != 'none' &&
-        selectedColor != null &&
-        selectedColor!.isNotEmpty) {
-      strategies.add(ColorFilterStrategy(selectedColor!, 'Found'));
-    } 
+  if (selectedCategory != 'none' && selectedCategory != null) {
+    strategies.add(CategoryFilterStrategy(selectedCategory!, 'Found'));
+  }
 
-    // Uncomment to enable location filtering if required
-    
-    if (selectedLocation != 'none' &&
-        selectedLocation != null &&
-        selectedLocation!.isNotEmpty) {
-      strategies.add(LocationFilterStrategy(selectedLocation!, 'Found'));
-    } 
+  if (selectedColor != 'none' && selectedColor != null) {
+    strategies.add(ColorFilterStrategy(selectedColor!, 'Found'));
+  }
 
-    // Use composite strategy to combine all selected strategies
-    CompositeSearchStrategy compositeStrategy =
-        CompositeSearchStrategy(strategies, itemType: ItemType.Found);
+  if (selectedLocation != 'none' && selectedLocation != null) {
+    strategies.add(LocationFilterStrategy(selectedLocation!, 'Found'));
+  }
 
-    // Filter items
+  if (strategies.isEmpty) {
+    setState(() {
+      filteredItems = [];
+    });
+    return;
+  }
+
+  CompositeSearchStrategy compositeStrategy =
+      CompositeSearchStrategy(strategies, itemType: ItemType.Found);
+
+  try {
     List<Item> filtered = await compositeStrategy.filterItems();
 
-    setState(() {
-      filteredItems = filtered;
-    });  
+    if (mounted) {
+      setState(() {
+        filteredItems = filtered;
+      });
+     // await Future.delayed(Duration(milliseconds: 100));
+    }
+  } catch (e) {
+    print("Error filtering items: $e");
+  }
 }
 
+  
 }

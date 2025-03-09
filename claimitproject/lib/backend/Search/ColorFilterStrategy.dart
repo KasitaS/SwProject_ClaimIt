@@ -15,7 +15,7 @@ class ColorFilterStrategy implements SearchStrategy {
   Future<List<Item>> filterItems() async {
     // Construct the URL with query parameters
       String endpoint = itemType == 'Lost' ? 'lost-items' : 'found-items';
-      Uri url = Uri.parse('http://172.20.10.5:8000/api/$endpoint/?color=$color&item_type=$itemType');
+      Uri url = Uri.parse('http://10.0.2.2:8000/api/$endpoint/?color=$color&item_type=$itemType');
 
     // Retrieve the token
     String? token = await getToken();

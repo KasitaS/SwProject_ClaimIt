@@ -33,12 +33,12 @@ class ItemTileD extends StatelessWidget {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white, // Background color
-            borderRadius: BorderRadius.circular(12), // Rounded corners
-            border: Border.all(color: Colors.black), // Border color
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12), 
+            border: Border.all(color: Colors.black), 
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.5), // Shadow effect
+                color: Colors.grey.withOpacity(0.5), 
                 spreadRadius: 3,
                 blurRadius: 5,
                 offset: const Offset(0, 3),
@@ -51,20 +51,20 @@ class ItemTileD extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10), // Rounded image corners
+                borderRadius: BorderRadius.circular(10), 
                 border: Border.all(color: Colors.black, width: 1),
               ),
               child: isLocalImage
                   ? Image.file(
-                      File(item.imagePath!), // Load local image
+                      File(item.imagePath!), 
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.image_not_supported, size: 50); // Fallback for broken images
+                        return const Icon(Icons.image_not_supported, size: 50); 
                       },
                     )
-                  : const Icon(Icons.image_not_supported, size: 50), // Show default icon if no image
+                  : const Icon(Icons.image_not_supported, size: 50), 
             ),
             title: Text(
               item.name ?? 'Unknown Item',

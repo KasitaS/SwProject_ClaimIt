@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:claimitproject/backend/CallAPI.dart';
 import 'package:claimitproject/backend/User.dart';
 import 'package:claimitproject/backend/auth_service.dart';
 import 'package:claimitproject/screens/AdminForm.dart';
@@ -21,55 +22,6 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-
-  Future<void> login(String email, String password) async {
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    final url = Uri.parse('http://10.0.2.2:8000/api/login/');
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email, "password": password}),
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final String token = data['access'];
-      final String refresh = data['refresh'];
-      final String username = data['username'];
-
-      // Ensure the token and username are not null
-      if (token.isNotEmpty && username.isNotEmpty) {
-        await saveToken(token, refresh);
-        User user = User(username: username);
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => HomePage(user: user)),
-          (route) => false,
-        );
-      } else {
-        _showErrorDialog("Login successful, but missing essential data.");
-      }
-    } else {
-      final errorData = jsonDecode(response.body);
-      final String errorMessage = errorData['detail'] ?? "Login failed. Please check your credentials.";
-      _showErrorDialog(errorMessage);
-    }
-  } catch (e) {
-    setState(() {
-      _isLoading = false;
-    });
-    _showErrorDialog("An error occurred: ${e.toString()}. Please try again.");
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -109,14 +61,7 @@ class _LoginFormState extends State<LoginForm> {
                           borderRadius: BorderRadius.circular(30.0),
                         ),
                         child: TextButton(
-                          onPressed: () {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              login(
-                                _emailController.text,
-                                _passwordController.text,
-                              );
-                            }
-                          },
+                          onPressed: _handleLogin,
                           child: Text(
                             'Login',
                             style: TextStyle(color: Colors.white),
@@ -176,5 +121,33 @@ class _LoginFormState extends State<LoginForm> {
         );
       },
     );
+  }
+
+  void _handleLogin() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final result = await CallAPI.login(
+        _emailController.text,
+        _passwordController.text,
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (result["success"]) {
+        User user = result["user"];
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => HomePage(user: user)),
+          (route) => false,
+        );
+      } else {
+        _showErrorDialog(result["message"]);
+      }
+    }
   }
 }

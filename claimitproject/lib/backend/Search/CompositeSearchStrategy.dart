@@ -11,23 +11,14 @@ class CompositeSearchStrategy implements SearchStrategy {
 
   @override
   Future<List<Item>> filterItems() async {
-    // If no strategies are provided, return an empty list
-    if (strategies.isEmpty) {
-      return []; // Return an empty list if no strategies are applied
-    }
+    if (strategies.isEmpty) return [];
 
-    List<Item> items = [];
+    List<Item> items = await strategies[0].filterItems();
+    if (items.isEmpty) return [];
 
-    int i = 0;
-    for (var strategy in strategies) {
-      if (i == 0) {
-        // Get items using the first strategy
-        items = await strategy.filterItems();
-      } else {
-        // Use the previous items and filter them through the next strategy
-        items = await strategy.filterItemsFromList(items);
-      }
-      i++;
+    for (var i = 1; i < strategies.length; i++) {
+      items = await strategies[i].filterItemsFromList(items);
+      if (items.isEmpty) return []; // Stop early
     }
     return items;
   }
@@ -35,9 +26,8 @@ class CompositeSearchStrategy implements SearchStrategy {
   @override
   Future<List<Item>> filterItemsFromList(List<Item> items) async {
     for (var strategy in strategies) {
-      List<Item> itemsFilteredByStrategy =
-          await strategy.filterItemsFromList(items);
-      items = itemsFilteredByStrategy;
+      items = await strategy.filterItemsFromList(items);
+      if (items.isEmpty) return [];
     }
     return items;
   }

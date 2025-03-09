@@ -2,10 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../backend/Item.dart';
 
- import 'dart:io';
-import 'package:flutter/material.dart';
-import '../backend/Item.dart';
-
 class ItemTile extends StatelessWidget {
   final Item item;
 
@@ -36,31 +32,37 @@ class ItemTile extends StatelessWidget {
           leading: Container(
             width: 100,
             height: 100,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10), 
+                border: Border.all(color: Colors.black, width: 1),
+              ),
             child: item.imagePath != null
                 ? Image.file(
                     File(item.imagePath!), // Load image from file path
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.image_not_supported, size: 50); 
+                      },
                   )
-                : Placeholder(), // Placeholder if image is not available
+                : const Icon(Icons.image_not_supported, size: 50), // Placeholder if image is not available
           ),
           title: Text(
-            item.name ?? '',
-            style: TextStyle(
+            item.name ?? 'Unknown Item',
+            style: const TextStyle(
               fontWeight: FontWeight.bold, // Make name text bold
             ),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Color: ${item.color ?? ''}'),
-              Text('Category: ${item.category ?? ''}'),
-              Text('Location: ${item.location ?? ''}'),
-              Text('Description: ${item.description ?? ''}'),
+              Text('Color: ${item.color ?? 'Unknown'}'),
+              Text('Category: ${item.category ?? 'Unknown'}'),
+              Text('Location: ${item.location ?? 'Unknown'}'),
+              Text('Description: ${item.description ?? 'Unknown'}'),
             ],
           ),
-          // You can add other actions or UI elements as needed
         ),
       ),
     );
