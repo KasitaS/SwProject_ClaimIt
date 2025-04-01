@@ -15,7 +15,8 @@ class ItemTileD extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isLocalImage = item.imagePath != null && item.imagePath!.startsWith('/data/'); // Check if the path is local
+    bool isLocalImage = item.image_path != null &&
+        item.image_path!.startsWith('/data/'); // Check if the path is local
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
@@ -34,11 +35,11 @@ class ItemTileD extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12), 
-            border: Border.all(color: Colors.black), 
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.black),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.5), 
+                color: Colors.grey.withOpacity(0.5),
                 spreadRadius: 3,
                 blurRadius: 5,
                 offset: const Offset(0, 3),
@@ -46,25 +47,26 @@ class ItemTileD extends StatelessWidget {
             ],
           ),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             leading: Container(
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10), 
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.black, width: 1),
               ),
               child: isLocalImage
                   ? Image.file(
-                      File(item.imagePath!), 
+                      File(item.image_path!),
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.image_not_supported, size: 50); 
+                        return const Icon(Icons.image_not_supported, size: 50);
                       },
                     )
-                  : const Icon(Icons.image_not_supported, size: 50), 
+                  : const Icon(Icons.image_not_supported, size: 50),
             ),
             title: Text(
               item.name ?? 'Unknown Item',

@@ -1,16 +1,21 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import 'package:claimitproject/backend/Item.dart';
 import 'package:claimitproject/backend/auth_service.dart';
+import 'package:claimitproject/backend/User.dart';
 import 'package:claimitproject/screens/RecommendLost.dart';
+import 'package:claimitproject/screens/FoundUserItemPage.dart'; // Import the FoundItemsPage
+import 'package:claimitproject/screens/LoginForm.dart'; // Import LoginForm
+import 'package:claimitproject/screens/NewHomePage.dart'; // Import NewHomePage
+import 'package:claimitproject/screens/MyLostItemList.dart'; // Import My Lost Item List
 import '../ui_helper/ItemTileD.dart';
 
 class MyItemList extends StatefulWidget {
-  final String username;
+  final User user;
 
-  const MyItemList({super.key, required this.username});
+  const MyItemList({Key? key, required this.user}) : super(key: key);
 
   @override
   State<MyItemList> createState() => _MyItemListState();
@@ -40,7 +45,7 @@ class _MyItemListState extends State<MyItemList> {
 
     try {
       final url = Uri.parse(
-          'http://10.0.2.2:8000/api/user-lost-items/${widget.username}/');
+          'http://172.20.10.3:8000/api/user-lost-items/${widget.user.username}/');
       final response = await http.get(
         url,
         headers: {
@@ -67,10 +72,7 @@ class _MyItemListState extends State<MyItemList> {
           errorMessage = 'Session expired. Please log in again';
           isLoading = false;
         });
-      }
-      
-      
-      else {
+      } else {
         setState(() {
           errorMessage =
               'Failed to load items: ${response.statusCode} ${response.body}';
@@ -85,10 +87,56 @@ class _MyItemListState extends State<MyItemList> {
     }
   }
 
-  void deleteItem(Item item, int index) {
-    setState(() {
-      itemList.removeAt(index);
-    });
+  Future<void> deleteItem(Item item, int index) async {
+    String? token = await getToken();
+
+    if (token == null) {
+      setState(() {
+        errorMessage = 'Session expired. Please log in again.';
+      });
+      return;
+    }
+
+    try {
+      final url = Uri.parse('http://172.20.10.3:8000/api/delete_item/');
+      final response = await http.delete(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'name': item.name,
+          'category': item.category,
+          'color': item.color,
+          'location': item.location,
+          'description': item.description,
+          'item_type': item.itemType,
+        }),
+      );
+
+      if (response.statusCode == 204) {
+        // Successfully deleted from the server, now remove from UI
+        setState(() {
+          itemList.removeAt(index);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item deleted successfully')),
+        );
+      } else if (response.statusCode == 404) {
+        setState(() {
+          errorMessage = 'Item not found.';
+        });
+      } else {
+        setState(() {
+          errorMessage = 'Failed to delete item: ${response.statusCode}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: ${e.toString()}';
+      });
+    }
   }
 
   @override
@@ -96,14 +144,73 @@ class _MyItemListState extends State<MyItemList> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.orange,
+        backgroundColor: Color.fromARGB(255, 240, 225, 207),
         title: const Text('My Lost Items'),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        // Remove the leading property to eliminate the back button
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 57, 41, 21),
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              title: Text('Home Page'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        NewHomePage(user: widget.user), // Pass the user object
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('My Lost Items'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text('Found Items'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FoundUserItemPage(
+                        user: widget.user), // Pass the user object
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              title: Text('Log Out'),
+              onTap: () {
+                _logout();
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginForm(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
       body: isLoading
@@ -141,6 +248,13 @@ class _MyItemListState extends State<MyItemList> {
                         },
                       ),
                     ),
+    );
+  }
+
+  void _logout() {
+    // Log out logic, e.g., clearing token
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => LoginForm()),
     );
   }
 }

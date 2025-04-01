@@ -33,20 +33,21 @@ class ItemTile extends StatelessWidget {
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10), 
-                border: Border.all(color: Colors.black, width: 1),
-              ),
-            child: item.imagePath != null
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.black, width: 1),
+            ),
+            child: item.image_path != null
                 ? Image.file(
-                    File(item.imagePath!), // Load image from file path
+                    File(item.image_path!), // Load image from file path
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.image_not_supported, size: 50); 
-                      },
+                      return const Icon(Icons.image_not_supported, size: 50);
+                    },
                   )
-                : const Icon(Icons.image_not_supported, size: 50), // Placeholder if image is not available
+                : const Icon(Icons.image_not_supported,
+                    size: 50), // Placeholder if image is not available
           ),
           title: Text(
             item.name ?? 'Unknown Item',

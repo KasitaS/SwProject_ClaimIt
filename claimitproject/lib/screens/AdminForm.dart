@@ -19,24 +19,24 @@ class _AdminFormState extends State<AdminForm> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Form'),
-        backgroundColor: Colors.orange,
+        backgroundColor: Color.fromARGB(255, 240, 225, 207),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 35.0),
             Image.asset(
-              'assets/images/staff.png',
-              height: 150,
+              'assets/images/admin.png',
+              height: 250,
             ),
-            const SizedBox(height: 35.0),
+            const SizedBox(height: 10.0),
             GetTextFormField(
               controller: _conVerify,
-              hintName: 'Verification Code',
+              hintName: 'Enter Verification Code',
               icon: Icons.description,
-              isObscureText: true,
+              isObscureText: true, // Use this for sensitive input
             ),
             const SizedBox(height: 16.0),
             ElevatedButton(
@@ -44,7 +44,8 @@ class _AdminFormState extends State<AdminForm> {
                 _validateCode();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange, // Set button background color
+                backgroundColor: Color.fromARGB(
+                    255, 240, 225, 207), // Set button background color
               ),
               child: const Text('Log in'),
             ),
@@ -54,7 +55,6 @@ class _AdminFormState extends State<AdminForm> {
     );
   }
 
-  // Function to validate the verification code with the backend
   Future<void> _validateCode() async {
     String enteredCode = _conVerify.text.trim();
 
@@ -62,21 +62,23 @@ class _AdminFormState extends State<AdminForm> {
       _showErrorDialog('Verification Code is required.');
     } else {
       try {
+        // Fetch CSRF token for security
+        final csrfResponse = await http
+            .get(Uri.parse('http://172.20.10.3:8000/api/get_csrf_token/'));
+        String csrfToken = csrfResponse.body;
 
-
-        final csrfResponse = await http.get(Uri.parse('http://10.0.2.2:8000/api/get_csrf_token/'));
-        String csrfToken = csrfResponse.body; 
-
+        // Send POST request to verify the admin code
         final response = await http.post(
-  Uri.parse('http://10.0.2.2:8000/api/verify_admin_code/'),
-  headers: {
-    "Content-Type": "application/json",
-    "X-CSRFToken": csrfToken,  // Make sure this header is included
-  },
-  body: json.encode({'admincode': enteredCode}),  // Ensure this is a valid JSON
-);
+          Uri.parse('http://172.20.10.3:8000/api/verify_admin_code/'),
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+          body: json.encode({'admincode': enteredCode}),
+        );
 
         if (response.statusCode == 200) {
+          // Navigate to AdminHome if verification is successful
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const AdminHome()),
@@ -91,7 +93,6 @@ class _AdminFormState extends State<AdminForm> {
     }
   }
 
-  // Function to show error dialog
   void _showErrorDialog(String message) {
     showDialog(
       context: context,

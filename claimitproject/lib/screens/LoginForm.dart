@@ -1,14 +1,11 @@
-import 'dart:convert';
 import 'package:claimitproject/backend/CallAPI.dart';
 import 'package:claimitproject/backend/User.dart';
-import 'package:claimitproject/backend/auth_service.dart';
 import 'package:claimitproject/screens/AdminForm.dart';
-import 'package:claimitproject/screens/HomePage.dart';
+import 'package:claimitproject/screens/NewHomePage.dart';
 import 'package:claimitproject/screens/SignUpForm.dart';
 import 'package:claimitproject/ui_helper/genLoginSignupHeader.dart';
 import 'package:claimitproject/ui_helper/genTextFormField.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -26,78 +23,109 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('ClaimIt KMITL: Lost and Found App'),
-        backgroundColor: Colors.orange,
-      ),
+      backgroundColor: Color.fromARGB(255, 240, 225, 207),
       body: SingleChildScrollView(
-        child: Center(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                genLoginSignUpHeader(),
-                GetTextFormField(
-                  controller: _emailController,
-                  icon: Icons.email,
-                  hintName: 'Email',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Background Image Section
+            Container(
+              height: MediaQuery.of(context).size.height *
+                  0.30, // Adjust height dynamically
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/iluvkmitl.jpg'),
+                  fit: BoxFit.cover,
                 ),
-                SizedBox(height: 5.0),
-                GetTextFormField(
-                  controller: _passwordController,
-                  icon: Icons.lock,
-                  hintName: 'Password',
-                  isObscureText: true,
-                ),
-                _isLoading
-                    ? CircularProgressIndicator()
-                    : Container(
-                        margin: EdgeInsets.all(30.0),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                        child: TextButton(
-                          onPressed: _handleLogin,
-                          child: Text(
-                            'Login',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                Row(
+              ),
+            ),
+
+            // Login Form Section
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Does not have an account yet?'),
+                    genLoginSignUpHeader(), // Logo & Text
+                    SizedBox(height: 10.0),
+
+                    GetTextFormField(
+                      controller: _emailController,
+                      icon: Icons.email,
+                      hintName: 'Email',
+                    ),
+                    SizedBox(height: 10.0),
+
+                    GetTextFormField(
+                      controller: _passwordController,
+                      icon: Icons.lock,
+                      hintName: 'Password',
+                      isObscureText: true,
+                    ),
+                    SizedBox(height: 20.0),
+
+                    // Login Button
+                    _isLoading
+                        ? CircularProgressIndicator()
+                        : SizedBox(
+                            width: 180, // Made button smaller
+                            child: ElevatedButton(
+                              onPressed: _handleLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Color.fromARGB(255, 57, 41, 21),
+                                padding: EdgeInsets.symmetric(vertical: 12.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25.0),
+                                ),
+                              ),
+                              child: Text(
+                                'Login',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                    SizedBox(height: 15.0),
+
+                    // Sign Up Option
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Don't have an account? "),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => SignUpForm()),
+                            );
+                          },
+                          child: Text('Sign up',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+
+                    // Admin Login
                     TextButton(
+                      child: Text('Only for Admin',
+                          style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => SignUpForm()),
+                          MaterialPageRoute(builder: (_) => AdminForm()),
                         );
                       },
-                      child: Text('Sign up'),
-                    )
+                    ),
                   ],
                 ),
-                TextButton(
-                  child: Text(
-                    'I am admin',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => AdminForm()),
-                    );
-                  },
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -130,8 +158,8 @@ class _LoginFormState extends State<LoginForm> {
       });
 
       final result = await CallAPI.login(
-        _emailController.text,
-        _passwordController.text,
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
 
       setState(() {
@@ -142,7 +170,7 @@ class _LoginFormState extends State<LoginForm> {
         User user = result["user"];
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => HomePage(user: user)),
+          MaterialPageRoute(builder: (_) => NewHomePage(user: user)),
           (route) => false,
         );
       } else {

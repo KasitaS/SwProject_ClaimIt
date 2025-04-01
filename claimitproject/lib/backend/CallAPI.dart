@@ -4,14 +4,13 @@ import 'package:claimitproject/backend/User.dart';
 import 'package:claimitproject/backend/auth_service.dart';
 
 class CallAPI {
-  static const String _loginUrl = 'http://10.0.2.2:8000/api';
-  static const String _signupUrl = 'http://10.0.2.2:8000/api';
-
+  static const String _loginUrl = 'http://172.20.10.3:8000/api';
+  static const String _signupUrl = 'http://172.20.10.3:8000/api';
 
   bool _isLoading = false;
 
-
-  static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(
+      String email, String password) async {
     final url = Uri.parse('$_loginUrl/login/');
 
     try {
@@ -31,17 +30,24 @@ class CallAPI {
           await saveToken(token, refresh);
           return {"success": true, "user": User(username: username)};
         } else {
-          return {"success": false, "message": "Login successful, but missing essential data."};
+          return {
+            "success": false,
+            "message": "Login successful, but missing essential data."
+          };
         }
       } else {
         final errorData = jsonDecode(response.body);
         return {
           "success": false,
-          "message": errorData['detail'] ?? "Login failed. Please check your credentials."
+          "message": errorData['detail'] ??
+              "Login failed. Please check your credentials."
         };
       }
     } catch (e) {
-      return {"success": false, "message": "An error occurred: ${e.toString()}."};
+      return {
+        "success": false,
+        "message": "An error occurred: ${e.toString()}."
+      };
     }
   }
 
@@ -67,6 +73,4 @@ class CallAPI {
       };
     }
   }
- 
 }
-

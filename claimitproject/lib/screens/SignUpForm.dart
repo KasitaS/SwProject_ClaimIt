@@ -54,7 +54,7 @@ class _SignUpFormState extends State<SignUpForm> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sign Up'),
-        backgroundColor: Colors.orange,
+        backgroundColor: Color.fromARGB(255, 240, 225, 207),
       ),
       body: Form(
         key: _formKey,
@@ -97,7 +97,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         margin: const EdgeInsets.all(30.0),
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.orange,
+                          color: Color.fromARGB(255, 57, 41, 21),
                           borderRadius: BorderRadius.circular(30.0),
                         ),
                         child: TextButton(

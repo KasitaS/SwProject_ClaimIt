@@ -1,4 +1,3 @@
-
 /*
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,8 +24,9 @@ import 'package:http/http.dart' as http;
 
 Future<void> saveToken(String token, String refreshToken) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('jwt_token', token);  // Save the access token
-  await prefs.setString('refresh_token', refreshToken);  // Save the refresh token
+  await prefs.setString('jwt_token', token); // Save the access token
+  await prefs.setString(
+      'refresh_token', refreshToken); // Save the refresh token
 }
 
 Future<String?> getToken() async {
@@ -71,7 +71,7 @@ Future<String?> refreshAccessToken() async {
   }
 
   final response = await http.post(
-    Uri.parse('http://10.0.2.2:8000/api/token/refresh/'),
+    Uri.parse('http://172.20.10.3:8000/api/token/refresh/'),
     headers: {'Content-Type': 'application/json'},
     body: json.encode({'refresh': refreshToken}),
   );

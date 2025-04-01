@@ -2,40 +2,37 @@ import 'dart:convert';
 import '../Item.dart';
 import 'SearchStrategy.dart';
 import 'package:http/http.dart' as http;
-import '../auth_service.dart';  
+import '../auth_service.dart';
 
 class CategoryFilterStrategy implements SearchStrategy {
   final String category;
-  final String itemType; 
+  final String itemType;
   final List<Item>? itemsToFilter;
 
   CategoryFilterStrategy(this.category, this.itemType, {this.itemsToFilter});
 
   @override
   Future<List<Item>> filterItems() async {
-   
     String endpoint = itemType == 'Lost' ? 'lost-items' : 'found-items';
-    Uri url = Uri.parse('http://10.0.2.2:8000/api/$endpoint/?category=$category&item_type=$itemType');
+    Uri url = Uri.parse(
+        'http://172.20.10.3:8000/api/$endpoint/?category=$category&item_type=$itemType');
 
-    
     String? token = await getToken();
 
-    
     final headers = {
-      'Authorization': 'Bearer $token',  // Add the token to the headers
+      'Authorization': 'Bearer $token', // Add the token to the headers
       'Content-Type': 'application/json', // Specify content type
     };
 
-    
     final response = await http.get(url, headers: headers);
 
     if (response.statusCode == 200) {
-      
       List<dynamic> data = json.decode(response.body);
-      List<Item> filteredItems = data.map((jsonItem) => Item.fromJson(jsonItem)).toList();
-      
+      List<Item> filteredItems =
+          data.map((jsonItem) => Item.fromJson(jsonItem)).toList();
+
       if (filteredItems.isEmpty) {
-        print("No items to display.");  
+        print("No items to display.");
       }
       return filteredItems;
     } else {
@@ -44,7 +41,8 @@ class CategoryFilterStrategy implements SearchStrategy {
   }
 
   Future<List<Item>> filterItemsFromList(List<Item> items) async {
-    
-    return items.where((item) => item.category == category && item.itemType == itemType).toList();
+    return items
+        .where((item) => item.category == category && item.itemType == itemType)
+        .toList();
   }
 }

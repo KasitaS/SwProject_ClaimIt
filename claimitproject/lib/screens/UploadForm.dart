@@ -8,9 +8,11 @@ import 'package:claimitproject/ui_helper/genTextFormField.dart';
 import 'package:claimitproject/ui_helper/getDropDown.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:typed_data';
+//import 'package:uuid/uuid.dart';
 
 class UploadForm extends StatefulWidget {
-  
   final ItemPoster itemPoster;
   UploadForm({Key? key, required this.itemPoster}) : super(key: key);
 
@@ -19,8 +21,6 @@ class UploadForm extends StatefulWidget {
 }
 
 class _UploadFormState extends State<UploadForm> {
-
-  
   String? selectedCategory;
   String? selectedLocation;
   String name = '';
@@ -37,147 +37,146 @@ class _UploadFormState extends State<UploadForm> {
 
   @override
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Upload Form'),
-      backgroundColor: Colors.orange,
-    ),
-    body: SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 10),
-            Container(
-              height: 200,
-              child: _selectedImage != null
-                  ? Image.file(
-                      _selectedImage!,
-                      fit: BoxFit.cover,
-                    )
-                  : Center(
-                      child: Text(
-                        "Please select an image",
-                        style: TextStyle(fontSize: 18, color: Colors.black),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Upload Form'),
+        backgroundColor: Colors.orange,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 10),
+              Container(
+                height: 200,
+                child: _selectedImage != null
+                    ? Image.file(
+                        _selectedImage!,
+                        fit: BoxFit.contain,
+                      )
+                    : Center(
+                        child: Text(
+                          "Please select an image",
+                          style: TextStyle(fontSize: 18, color: Colors.black),
+                        ),
                       ),
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      _pickImageFromGallery();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
                     ),
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _pickImageFromGallery();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    child: Text(
+                      'Pick Image',
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
-                  child: Text(
-                    'Pick Image',
-                    style: TextStyle(color: Colors.black),
+                  SizedBox(width: 8.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      _openCamera();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                    ),
+                    child: Text(
+                      'Open Camera',
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
-                ),
-                SizedBox(width: 8.0),
-                ElevatedButton(
-                  onPressed: () {
-                    _openCamera();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                ],
+              ),
+              SizedBox(height: 16),
+              SizedBox(width: 8),
+              GetTextFormField(
+                controller: _conColor,
+                hintName: 'Color',
+                icon: Icons.palette,
+              ),
+              SizedBox(height: 16),
+              GetTextFormField(
+                controller: _conName,
+                hintName: 'Name',
+                icon: Icons.title,
+              ),
+              SizedBox(height: 8),
+              getDropdownFormField(
+                hintName: 'Category',
+                items: [
+                  'IT Gadget',
+                  'Stationary',
+                  'Personal Belonging',
+                  'Bag',
+                  'Others'
+                ],
+                icon: Icons.category,
+                onChanged: (value) {
+                  setState(() {
+                    selectedCategory = value;
+                  });
+                },
+                value: selectedCategory,
+              ),
+              SizedBox(height: 8),
+              getDropdownFormField(
+                hintName: 'Location',
+                items: [
+                  'HM Building',
+                  'ECC Building',
+                  'Engineering Faculty',
+                  'Architect Faculty',
+                  'Science Faculty',
+                  'Business Faculty',
+                  'Art Faculty',
+                  'Others'
+                ],
+                icon: Icons.location_on,
+                onChanged: (value) {
+                  setState(() {
+                    selectedLocation = value;
+                  });
+                },
+                value: selectedLocation,
+              ),
+              SizedBox(height: 8),
+              GetTextFormField(
+                controller: _conDescription,
+                hintName: 'Description',
+                icon: Icons.description,
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      _uploadItem();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                    ),
+                    child: Text(
+                      'Upload',
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
-                  child: Text(
-                    'Open Camera',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            SizedBox(width: 8),
-            GetTextFormField(
-              controller: _conColor,
-              hintName: 'Color',
-              icon: Icons.palette,
-            ),
-            SizedBox(height: 16),
-            GetTextFormField(
-              controller: _conName,
-              hintName: 'Name',
-              icon: Icons.title,
-            ),
-            SizedBox(height: 8),
-            getDropdownFormField(
-              hintName: 'Category',
-              items: [
-                'IT Gadget',
-                'Stationary',
-                'Personal Belonging',
-                'Bag',
-                'Others'
-              ],
-              icon: Icons.category,
-              onChanged: (value) {
-                setState(() {
-                  selectedCategory = value;
-                });
-              },
-              value: selectedCategory,
-            ),
-            SizedBox(height: 8),
-            getDropdownFormField(
-              hintName: 'Location',
-              items: [
-                'HM Building',
-                'ECC Building',
-                'Engineering Faculty',
-                'Architect Faculty',
-                'Science Faculty',
-                'Business Faculty',
-                'Art Faculty',
-                'Others'
-              ],
-              icon: Icons.location_on,
-              onChanged: (value) {
-                setState(() {
-                  selectedLocation = value;
-                });
-              },
-              value: selectedLocation,
-            ),
-            SizedBox(height: 8),
-            GetTextFormField(
-              controller: _conDescription,
-              hintName: 'Description',
-              icon: Icons.description,
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _uploadItem();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                  ),
-                  child: Text(
-                    'Upload',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Future<void> _pickImageFromGallery() async {
     try {
@@ -194,7 +193,7 @@ Widget build(BuildContext context) {
 
         // Remove the last two characters
         cleanedDetectedObject = cleanedDetectedObject.substring(
-            0, cleanedDetectedObject.length - 1);
+            1, cleanedDetectedObject.length - 2);
 
         print('Detected Object: $cleanedDetectedObject');
         _conName.text = cleanedDetectedObject; // Update name field
@@ -205,7 +204,7 @@ Widget build(BuildContext context) {
       print('Error picking image: $e');
     }
   }
-  
+
   Future<void> _openCamera() async {
     try {
       final pickedFile =
@@ -221,7 +220,7 @@ Widget build(BuildContext context) {
 
         // Remove the last two characters
         cleanedDetectedObject = cleanedDetectedObject.substring(
-            0, cleanedDetectedObject.length - 1);
+            1, cleanedDetectedObject.length - 2);
 
         print('Detected Object: $cleanedDetectedObject');
         _conName.text = cleanedDetectedObject; // Update name field
@@ -233,6 +232,24 @@ Widget build(BuildContext context) {
     }
   }
 
+  Future<String> _saveImageLocally(Uint8List imageBytes) async {
+    try {
+      final directory =
+          await getApplicationDocumentsDirectory(); // Get app's storage directory
+      String uniqueFilename =
+          'image_${DateTime.now().millisecondsSinceEpoch}.png'; // Generate unique filename
+      final filePath =
+          '${directory.path}/$uniqueFilename'; // Construct full file path
+
+      File file = File(filePath);
+      await file.writeAsBytes(imageBytes); // Write bytes to file
+
+      return filePath; // Return saved file path
+    } catch (e) {
+      print("Error saving image: $e");
+      return ''; // Return empty string in case of error
+    }
+  }
 
   //upload part starts
   Future<void> _uploadItem() async {
@@ -245,18 +262,24 @@ Widget build(BuildContext context) {
       // Display an error message or alert the user about missing information
       return;
     }
-    
+
     String itemType = widget.itemPoster.runtimeType == User ? 'Lost' : 'Found';
+    Uint8List bgRemovedImage =
+        await APIService.instance.remove_bg(_selectedImage!.path);
+    String nobgImagePath =
+        await _saveImageLocally(bgRemovedImage); // No filename needed
 
     Item item = Item(
       name: _conName.text,
-      category: selectedCategory ?? 'Unknown',// Joining selected colors into a string
+      category: selectedCategory ??
+          'Unknown', // Joining selected colors into a string
       location: selectedLocation ?? 'Unknown',
       color: _conColor.text,
       description: _conDescription.text,
-      imagePath: _selectedImage!.path,
+      image_path: _selectedImage!.path,
       itemType: itemType,
-    ); 
+      nobg_image_path: nobgImagePath,
+    );
 
     try {
       await widget.itemPoster.post(item);
@@ -286,5 +309,4 @@ Widget build(BuildContext context) {
           );
         });
   }
-
 }

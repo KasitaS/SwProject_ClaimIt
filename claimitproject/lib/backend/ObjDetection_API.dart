@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'dart:typed_data';
 
 class APIService {
   // Private constructor to prevent external instantiation
@@ -28,12 +29,23 @@ class APIService {
 
     return responseBody;
   } */
-  
-  Future<String> getDetected(String image1Path) async {
-    var uri = Uri.parse("http://192.168.193.248:8000/get_detected");
+  Future<Uint8List> remove_bg(String image1Path) async {
+    var uri = Uri.parse("http://172.20.10.3:8001/remove_background/");
     var request = http.MultipartRequest("POST", uri);
 
-    var image1File = await http.MultipartFile.fromPath('image', image1Path);
+    var image1File = await http.MultipartFile.fromPath('file', image1Path);
+
+    request.files.add(image1File);
+    var streamedResponse = await request.send();
+
+    return await streamedResponse.stream.toBytes(); // Receive image bytes
+  }
+
+  Future<String> getDetected(String image1Path) async {
+    var uri = Uri.parse("http://172.20.10.3:8001/get_detected/");
+    var request = http.MultipartRequest("POST", uri);
+
+    var image1File = await http.MultipartFile.fromPath('file', image1Path);
 
     request.files.add(image1File);
 
