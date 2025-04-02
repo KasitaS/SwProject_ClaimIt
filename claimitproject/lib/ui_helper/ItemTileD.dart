@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../backend/Item.dart';
@@ -15,8 +14,10 @@ class ItemTileD extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine if the image path is a network URL or local path
     bool isLocalImage = item.image_path != null &&
-        item.image_path!.startsWith('/data/'); // Check if the path is local
+        item.image_path!
+            .startsWith('items/images/'); // Adjust according to your media path
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
@@ -56,9 +57,9 @@ class ItemTileD extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.black, width: 1),
               ),
-              child: isLocalImage
-                  ? Image.file(
-                      File(item.image_path!),
+              child: item.image_path != null
+                  ? Image.network(
+                      'http://172.20.10.3:8000/api/get_image_file/?image_path=${Uri.encodeComponent(item.image_path!)}',
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,
@@ -66,7 +67,8 @@ class ItemTileD extends StatelessWidget {
                         return const Icon(Icons.image_not_supported, size: 50);
                       },
                     )
-                  : const Icon(Icons.image_not_supported, size: 50),
+                  : const Icon(Icons.image_not_supported,
+                      size: 50), // Placeholder if no image path
             ),
             title: Text(
               item.name ?? 'Unknown Item',

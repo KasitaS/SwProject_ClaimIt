@@ -218,6 +218,7 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
   }
 
   void searchItems() async {
+    if (!mounted) return;
     String searchText = searchController.text.trim().toLowerCase();
 
     Uri url = Uri.parse(

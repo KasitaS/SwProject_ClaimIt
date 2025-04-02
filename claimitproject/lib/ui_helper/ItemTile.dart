@@ -37,8 +37,8 @@ class ItemTile extends StatelessWidget {
               border: Border.all(color: Colors.black, width: 1),
             ),
             child: item.image_path != null
-                ? Image.file(
-                    File(item.image_path!), // Load image from file path
+                ? Image.network(
+                    'http://172.20.10.3:8000/api/get_image_file/?image_path=${item.image_path!}',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
@@ -47,7 +47,7 @@ class ItemTile extends StatelessWidget {
                     },
                   )
                 : const Icon(Icons.image_not_supported,
-                    size: 50), // Placeholder if image is not available
+                    size: 50), // Placeholder if no image path
           ),
           title: Text(
             item.name ?? 'Unknown Item',

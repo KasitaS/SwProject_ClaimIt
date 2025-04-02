@@ -8,6 +8,7 @@ class Item {
   final String? image_path;
   final String itemType;
   final String? nobg_image_path;
+  final Map<String, dynamic>? extraData;
 
   Item({
     this.id,
@@ -19,12 +20,13 @@ class Item {
     this.image_path,
     required this.itemType,
     this.nobg_image_path,
+    this.extraData,
   });
 
   // Convert JSON to Dart object
   factory Item.fromJson(Map<String, dynamic> json) {
     String baseUrl =
-        "http://172.20.10.3:8000/"; // Change to your actual API URL if different
+        "http://192.1688..12828:8000/"; // Change to your actual API URL if different
 
     return Item(
       id: json['id'],
@@ -42,6 +44,12 @@ class Item {
               json['nobg_image_path'].startsWith('/')
           ? '$baseUrl${json['nobg_image_path']}' // Add base URL for relative paths
           : json['nobg_image_path'] ?? '',
+      extraData: {
+        'owner_name': json['owner_name'] ?? 'Unknown',
+        'owner_email': json['owner_email'] ?? 'Unknown',
+      },
+
+// ✅ Parse ownerEmail
     );
   }
 

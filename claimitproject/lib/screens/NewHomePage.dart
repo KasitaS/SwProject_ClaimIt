@@ -41,6 +41,18 @@ class _NewHomePageState extends State<NewHomePage> {
               .toList();
           itemsFetched = true;
         });
+
+        // Print all loaded items for debugging
+        for (var item in lostItems) {
+          print("Loaded Item: ");
+          print("Name: ${item.name}");
+          print("Image Path: ${item.image_path}");
+          print("Color: ${item.color}");
+          print("Category: ${item.category}");
+          print("Location: ${item.location}");
+          print("Description: ${item.description}");
+          print("--------------------"); // Separator for clarity
+        }
       } else {
         print('Failed to retrieve lost items: ${response.statusCode}');
       }
@@ -64,21 +76,40 @@ class _NewHomePageState extends State<NewHomePage> {
               decoration: BoxDecoration(
                 color: Color.fromARGB(255, 57, 41, 21),
               ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.person, // Choose an icon from Material Icons
+                    color: Colors.white,
+                    size: 32, // Adjust size as needed
+                  ),
+                  SizedBox(width: 10), // Space between icon and text
+                  Text(
+                    'ClaimIt',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
+              leading: Icon(
+                Icons.home, // Home icon
+                color: Colors.blue, // Set the icon color to blue
+              ),
               title: Text('Home Page'),
               onTap: () {
                 Navigator.pop(context);
+                // Add navigation to the Home Page if needed
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.folder, // Choose an appropriate icon for 'My Lost Items'
+                color: Colors.blue, // Set the icon color
+              ),
               title: Text('My Lost Items'),
               onTap: () {
                 Navigator.pop(context);
@@ -91,6 +122,10 @@ class _NewHomePageState extends State<NewHomePage> {
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.list, // List icon for Found Items
+                color: Colors.blue,
+              ),
               title: Text('Found Items'),
               onTap: () {
                 Navigator.pop(context);
@@ -103,6 +138,10 @@ class _NewHomePageState extends State<NewHomePage> {
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.logout, // Logout icon
+                color: Colors.blue,
+              ),
               title: Text('Log Out'),
               onTap: () {
                 _logout();

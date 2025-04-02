@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../backend/Item.dart';
 
@@ -9,22 +8,21 @@ class ItemTileP extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("____________________");
+    print(item.image_path);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white
-              .withOpacity(0.7), // Set background color with transparency
-          borderRadius:
-              BorderRadius.circular(12), // Add border radius for curves
-          border: Border.all(color: Colors.black), // Set border color to black
+          color: Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.black),
           boxShadow: [
             BoxShadow(
-              color:
-                  Colors.grey.withOpacity(0.5), // Set shadow color and opacity
-              spreadRadius: 3, // Set spread radius
-              blurRadius: 5, // Set blur radius
-              offset: Offset(0, 3), // Set shadow offset
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 5,
+              offset: Offset(0, 3),
             ),
           ],
         ),
@@ -38,8 +36,8 @@ class ItemTileP extends StatelessWidget {
               border: Border.all(color: Colors.black, width: 1),
             ),
             child: item.image_path != null
-                ? Image.file(
-                    File(item.image_path!), // Load image from file path
+                ? Image.network(
+                    'http://172.20.10.3:8000/api/get_image_file/?image_path=${(item.image_path!)}',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
@@ -47,13 +45,12 @@ class ItemTileP extends StatelessWidget {
                       return const Icon(Icons.image_not_supported, size: 50);
                     },
                   )
-                : const Icon(Icons.image_not_supported,
-                    size: 50), // Placeholder if image is not available
+                : const Icon(Icons.image_not_supported, size: 50),
           ),
           title: Text(
             item.name ?? 'Unknown Item',
             style: const TextStyle(
-              fontWeight: FontWeight.bold, // Make name text bold
+              fontWeight: FontWeight.bold,
             ),
           ),
           subtitle: Column(

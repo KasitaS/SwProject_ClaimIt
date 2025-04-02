@@ -43,8 +43,10 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
             data.map((jsonItem) => Item.fromJson(jsonItem)).toList();
 
         // Compare images and filter based on similarity
+        print(foundItems);
         await compareImages(foundItems);
 
+        print('here');
         setState(() {
           isLoading = false;
         });
@@ -63,16 +65,20 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
   }
 
   Future<void> compareImages(List<Item> foundItems) async {
+    print('in here');
     List<Item> similarItems = [];
 
     for (var foundItem in foundItems) {
-      // Check if nobg_image_path is not null and not empty
-      if (foundItem.nobg_image_path != null &&
+      // Check if the image path for both images is not null and not empty
+      if (widget.item.nobg_image_path != null &&
+          widget.item.nobg_image_path!.isNotEmpty &&
+          foundItem.nobg_image_path != null &&
           foundItem.nobg_image_path!.isNotEmpty) {
-        double similarityScore = await getSimilarity(widget.item.image_path!,
-            foundItem.nobg_image_path!); // Use ! to assert non-null
+        double similarityScore = await getSimilarity(
+            'http://172.20.10.3:8000/api/get_image_file/?image_path=${(widget.item.nobg_image_path!)}', // Get image URL for lost item
+            'http://172.20.10.3:8000/api/get_image_file/?image_path=${foundItem.nobg_image_path!}'); // Get image URL for found item
 
-        if (similarityScore > 0.75) {
+        if (similarityScore > 0.70) {
           similarItems.add(foundItem);
         }
       }
@@ -84,13 +90,15 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
   }
 
   Future<double> getSimilarity(
-      String lostItemImage, String foundItemImage) async {
+      String lostItemImageUrl, String foundItemImageUrl) async {
     try {
-      var lostImageResponse = await http.get(Uri.parse(lostItemImage));
-      var foundImageResponse = await http.get(Uri.parse(foundItemImage));
+      // Fetch the images from the provided URLs
+      var lostImageResponse = await http.get(Uri.parse(lostItemImageUrl));
+      var foundImageResponse = await http.get(Uri.parse(foundItemImageUrl));
 
       if (lostImageResponse.statusCode == 200 &&
           foundImageResponse.statusCode == 200) {
+        // Prepare the request for similarity comparison
         var request = http.MultipartRequest("POST", Uri.parse(fastApiUrl));
         request.files.add(http.MultipartFile.fromBytes(
             "file1", lostImageResponse.bodyBytes,
@@ -103,7 +111,8 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
         var responseData = await response.stream.bytesToString();
         var jsonData = json.decode(responseData);
 
-        return jsonData["similarity_score"][0]; // Extract similarity score
+        return jsonData["similarity_score"]
+            [0]; // Assuming the response structure has similarity_score
       }
     } catch (e) {
       print("Error getting similarity: $e");
@@ -131,11 +140,18 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
                         leading: Container(
                           width: 100,
                           height: 100,
-                          child: widget.item.image_path != null &&
-                                  File(widget.item.image_path!).existsSync()
-                              ? Image.file(File(widget.item.image_path!),
-                                  width: 100, height: 100, fit: BoxFit.cover)
-                              : Placeholder(),
+                          child: widget.item.image_path != null
+                              ? Image.network(
+                                  'http://172.20.10.3:8000/api/get_image_file/?image_path=${Uri.encodeComponent(widget.item.image_path!)}',
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(Icons.image_not_supported,
+                                        size: 50);
+                                  },
+                                )
+                              : const Icon(Icons.image_not_supported, size: 50),
                         ),
                         title: Text(widget.item.name ?? '',
                             style: TextStyle(fontWeight: FontWeight.bold)),

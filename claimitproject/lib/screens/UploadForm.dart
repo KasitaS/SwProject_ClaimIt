@@ -26,6 +26,7 @@ class _UploadFormState extends State<UploadForm> {
   String name = '';
   String color = '';
   String description = '';
+  bool isLoading = false;
 
   final _conName = TextEditingController();
   final _conColor = TextEditingController();
@@ -41,140 +42,142 @@ class _UploadFormState extends State<UploadForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Upload Form'),
-        backgroundColor: Colors.orange,
+        backgroundColor: Color.fromARGB(255, 240, 225, 207),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(height: 10),
-              Container(
-                height: 200,
-                child: _selectedImage != null
-                    ? Image.file(
-                        _selectedImage!,
-                        fit: BoxFit.contain,
-                      )
-                    : Center(
-                        child: Text(
-                          "Please select an image",
-                          style: TextStyle(fontSize: 18, color: Colors.black),
+      body: isLoading // Show loading indicator if uploading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(height: 10),
+                    Container(
+                      height: 200,
+                      child: _selectedImage != null
+                          ? Image.file(
+                              _selectedImage!,
+                              fit: BoxFit.contain,
+                            )
+                          : Center(
+                              child: Text(
+                                "Please select an image",
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.black),
+                              ),
+                            ),
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            _pickImageFromGallery();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 57, 41, 21),
+                          ),
+                          child: Text(
+                            'Pick Image',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
-                      ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      _pickImageFromGallery();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                        SizedBox(width: 8.0),
+                        ElevatedButton(
+                          onPressed: () {
+                            _openCamera();
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Color.fromARGB(255, 57, 41, 21)),
+                          child: Text(
+                            'Open Camera',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      'Pick Image',
-                      style: TextStyle(color: Colors.black),
+                    SizedBox(height: 16),
+                    SizedBox(width: 8),
+                    GetTextFormField(
+                      controller: _conColor,
+                      hintName: 'Color',
+                      icon: Icons.palette,
                     ),
-                  ),
-                  SizedBox(width: 8.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      _openCamera();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                    SizedBox(height: 16),
+                    GetTextFormField(
+                      controller: _conName,
+                      hintName: 'Name',
+                      icon: Icons.title,
                     ),
-                    child: Text(
-                      'Open Camera',
-                      style: TextStyle(color: Colors.black),
+                    SizedBox(height: 8),
+                    getDropdownFormField(
+                      hintName: 'Category',
+                      items: [
+                        'IT Gadget',
+                        'Stationary',
+                        'Personal Belonging',
+                        'Bag',
+                        'Others'
+                      ],
+                      icon: Icons.category,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCategory = value;
+                        });
+                      },
+                      value: selectedCategory,
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              SizedBox(width: 8),
-              GetTextFormField(
-                controller: _conColor,
-                hintName: 'Color',
-                icon: Icons.palette,
-              ),
-              SizedBox(height: 16),
-              GetTextFormField(
-                controller: _conName,
-                hintName: 'Name',
-                icon: Icons.title,
-              ),
-              SizedBox(height: 8),
-              getDropdownFormField(
-                hintName: 'Category',
-                items: [
-                  'IT Gadget',
-                  'Stationary',
-                  'Personal Belonging',
-                  'Bag',
-                  'Others'
-                ],
-                icon: Icons.category,
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
-                value: selectedCategory,
-              ),
-              SizedBox(height: 8),
-              getDropdownFormField(
-                hintName: 'Location',
-                items: [
-                  'HM Building',
-                  'ECC Building',
-                  'Engineering Faculty',
-                  'Architect Faculty',
-                  'Science Faculty',
-                  'Business Faculty',
-                  'Art Faculty',
-                  'Others'
-                ],
-                icon: Icons.location_on,
-                onChanged: (value) {
-                  setState(() {
-                    selectedLocation = value;
-                  });
-                },
-                value: selectedLocation,
-              ),
-              SizedBox(height: 8),
-              GetTextFormField(
-                controller: _conDescription,
-                hintName: 'Description',
-                icon: Icons.description,
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      _uploadItem();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
+                    SizedBox(height: 8),
+                    getDropdownFormField(
+                      hintName: 'Location',
+                      items: [
+                        'HM Building',
+                        'ECC Building',
+                        'Engineering Faculty',
+                        'Architect Faculty',
+                        'Science Faculty',
+                        'Business Faculty',
+                        'Art Faculty',
+                        'Others'
+                      ],
+                      icon: Icons.location_on,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedLocation = value;
+                        });
+                      },
+                      value: selectedLocation,
                     ),
-                    child: Text(
-                      'Upload',
-                      style: TextStyle(color: Colors.black),
+                    SizedBox(height: 8),
+                    GetTextFormField(
+                      controller: _conDescription,
+                      hintName: 'Description',
+                      icon: Icons.description,
                     ),
-                  ),
-                ],
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            _uploadItem();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 57, 41, 21),
+                          ),
+                          child: Text(
+                            'Upload',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -262,6 +265,9 @@ class _UploadFormState extends State<UploadForm> {
       // Display an error message or alert the user about missing information
       return;
     }
+    setState(() {
+      isLoading = true; // Start loading
+    });
 
     String itemType = widget.itemPoster.runtimeType == User ? 'Lost' : 'Found';
     Uint8List bgRemovedImage =
@@ -285,8 +291,14 @@ class _UploadFormState extends State<UploadForm> {
       await widget.itemPoster.post(item);
       _showSuccessDialog();
       print('Item uploaded successfully');
+      setState(() {
+        isLoading = false; // Stop loading on error
+      });
     } catch (e) {
       print('Error uploading item: $e');
+      setState(() {
+        isLoading = false; // Stop loading on error
+      });
     }
   }
 

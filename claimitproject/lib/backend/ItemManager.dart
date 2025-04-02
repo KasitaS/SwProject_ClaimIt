@@ -38,6 +38,7 @@ class ItemManager implements ItemPoster {
       adminCode: json['admincode'] ?? '',
     );
   }
+  @override
   Future<void> post(Item newItem) async {
     final url = Uri.parse('http://172.20.10.3:8000/api/items/');
     final token = await getToken(); // Retrieve the token
@@ -60,19 +61,22 @@ class ItemManager implements ItemPoster {
       request.fields['description'] = newItem.description;
 
       // Check if there's an image and add it to the request
-      if (newItem.image_path != null) {
+      if (newItem.image_path != null && newItem.image_path!.isNotEmpty) {
         request.files.add(
           await http.MultipartFile.fromPath(
-            'image_path', newItem.image_path!,
+            'image_path',
+            newItem.image_path!,
             contentType: MediaType('image', 'jpeg'), // Adjust as necessary
           ),
         );
       }
 
-      if (newItem.nobg_image_path != null) {
+      if (newItem.nobg_image_path != null &&
+          newItem.nobg_image_path!.isNotEmpty) {
         request.files.add(
           await http.MultipartFile.fromPath(
-            'nobg_image_path', newItem.nobg_image_path!,
+            'nobg_image_path',
+            newItem.nobg_image_path!,
             contentType: MediaType('image', 'png'), // Adjust as necessary
           ),
         );
@@ -86,7 +90,8 @@ class ItemManager implements ItemPoster {
         print('Item uploaded successfully');
         // Handle successful upload
       } else {
-        print('Failed to upload item: ${response.body}');
+        print(
+            'Failed to upload item: ${response.statusCode} - ${response.body}');
       }
     } catch (error) {
       print('Error occurred: $error');
@@ -253,13 +258,14 @@ class ItemManager implements ItemPoster {
         return {
           'lost_count': data['lost_count'],
           'found_count': data['found_count'],
+          'received_count': data['received_count']
         };
       } else {
         throw Exception('Failed to load item counts');
       }
     } catch (e) {
       print('Error fetching item counts: $e');
-      return {'lost_count': 0, 'found_count': 0};
+      return {'lost_count': 0, 'found_count': 0, 'received_count': 0};
     }
   }
 }

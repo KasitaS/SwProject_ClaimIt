@@ -32,7 +32,7 @@ class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
           receivedItems = (json.decode(response.body) as List)
               .map((item) => Item.fromJson(item))
               .toList();
-          itemsFetched = true; // Set the fetched status to true
+          itemsFetched = true;
         });
       } else {
         print('Failed to retrieve received items: ${response.statusCode}');
@@ -46,29 +46,66 @@ class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Received Items'),
+        title: const Text('Received Items',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.blueAccent,
+        centerTitle: true,
       ),
-      body: itemsFetched // Check if items have been fetched
+      body: itemsFetched
           ? (receivedItems.isEmpty
               ? Center(
                   child: Text(
                     'No received items available.',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.black54),
                   ),
                 )
-              : ListView.builder(
-                  itemCount: receivedItems.length,
-                  itemBuilder: (context, index) {
-                    return ItemTile(
-                        item: receivedItems[index]); // Display each item
-                  },
+              : Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ListView.builder(
+                    itemCount: receivedItems.length,
+                    itemBuilder: (context, index) {
+                      Item item = receivedItems[index];
+                      return Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(12),
+                          title: Text(
+                            item.name,
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Category: ${item.category}',
+                                  style: TextStyle(color: Colors.black87)),
+                              SizedBox(height: 4),
+                              Text(
+                                  'Owner: ${item.extraData?['owner_name'] ?? 'Unknown'}',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.w500)),
+                              Text(
+                                  'Email: ${item.extraData?['owner_email'] ?? 'N/A'}',
+                                  style: TextStyle(color: Colors.black54)),
+                            ],
+                          ),
+                          leading: Icon(Icons.check_circle,
+                              color: Colors.green, size: 32),
+                          tileColor: Colors.white,
+                        ),
+                      );
+                    },
+                  ),
                 ))
           : Center(
-              child:
-                  CircularProgressIndicator()), // Show loading indicator while fetching
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }

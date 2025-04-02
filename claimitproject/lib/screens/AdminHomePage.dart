@@ -6,6 +6,7 @@ import 'package:claimitproject/screens/LoginForm.dart';
 import 'package:claimitproject/screens/LostItemPage.dart';
 import 'package:claimitproject/screens/UploadForm.dart';
 import 'package:claimitproject/screens/AdminReceiveItemPage.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -18,6 +19,7 @@ class _AdminHomeState extends State<AdminHome> {
   ItemManager itemManager = ItemManager();
   int lostItemCount = 0;
   int foundItemCount = 0;
+  int receivedItemCount = 0;
 
   @override
   void initState() {
@@ -30,6 +32,7 @@ class _AdminHomeState extends State<AdminHome> {
     setState(() {
       lostItemCount = counts['lost_count'] ?? 0;
       foundItemCount = counts['found_count'] ?? 0;
+      receivedItemCount = counts['received_count'] ?? 0;
     });
   }
 
@@ -177,16 +180,22 @@ class _AdminHomeState extends State<AdminHome> {
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
+            _buildPieChart(), // Add Pie Chart for visual representation
+            SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(
                     child: _buildCountCard(
-                        'Lost Items', lostItemCount, Colors.red, Icons.search)),
-                SizedBox(width: 16),
+                        'Lost', lostItemCount, Colors.red, Icons.search)),
+                SizedBox(width: 5),
                 Expanded(
-                    child: _buildCountCard('Found Items', foundItemCount,
-                        Colors.green, Icons.list)),
+                    child: _buildCountCard(
+                        'Found', foundItemCount, Colors.green, Icons.list)),
+                SizedBox(width: 5),
+                Expanded(
+                    child: _buildCountCard('Receive', receivedItemCount,
+                        Colors.blue, Icons.mark_chat_read)),
               ],
             ),
             SizedBox(height: 20),
@@ -201,12 +210,80 @@ class _AdminHomeState extends State<AdminHome> {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  _buildDrawerItem(
-                      Icons.checklist, 'Record Found', () => _upload(context)),
-                  _buildDrawerItem(Icons.check_box, 'Record Received',
-                      () => _navigateToReceiveItems(context)),
+                  ElevatedButton(
+                    onPressed: () => _upload(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.upload, size: 40, color: Colors.white),
+                        SizedBox(height: 10),
+                        Text('Upload Item',
+                            style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _navigateToReceiveItems(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check_box, size: 40, color: Colors.white),
+                        SizedBox(height: 10),
+                        Text('Record Received',
+                            style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPieChart() {
+    return SizedBox(
+      height: 200,
+      child: PieChart(
+        PieChartData(
+          sectionsSpace: 2,
+          centerSpaceRadius: 40,
+          sections: [
+            PieChartSectionData(
+              value: lostItemCount.toDouble(),
+              color: Colors.red,
+              title: 'Lost\n$lostItemCount',
+              radius: 50,
+              titleStyle:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            PieChartSectionData(
+              value: foundItemCount.toDouble(),
+              color: Colors.green,
+              title: 'Found\n$foundItemCount',
+              radius: 50,
+              titleStyle:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            PieChartSectionData(
+              value: receivedItemCount.toDouble(),
+              color: Colors.blue,
+              title: 'Received\n$receivedItemCount',
+              radius: 50,
+              titleStyle:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ],
         ),

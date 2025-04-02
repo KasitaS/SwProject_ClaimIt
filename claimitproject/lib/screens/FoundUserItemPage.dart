@@ -87,50 +87,71 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
               decoration: BoxDecoration(
                 color: Color.fromARGB(255, 57, 41, 21),
               ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.person, // Choose an icon from Material Icons
+                    color: Colors.white,
+                    size: 32, // Adjust size as needed
+                  ),
+                  SizedBox(width: 10), // Space between icon and text
+                  Text(
+                    'ClaimIt',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
+              leading: Icon(
+                Icons.home, // Home icon
+                color: Colors.blue, // Set the icon color to blue
+              ),
               title: Text('Home Page'),
               onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        NewHomePage(user: currentUser), // Pass the user object
-                  ),
-                );
+                Navigator.pop(context);
+                // Add navigation to the Home Page if needed
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.folder, // Choose an appropriate icon for 'My Lost Items'
+                color: Colors.blue, // Set the icon color
+              ),
               title: Text('My Lost Items'),
               onTap: () {
-                Navigator.pushReplacement(
+                Navigator.pop(context);
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        MyItemList(user: currentUser), // Pass the user object
+                    builder: (context) => MyItemList(user: currentUser),
                   ),
                 );
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.list, // List icon for Found Items
+                color: Colors.blue,
+              ),
               title: Text('Found Items'),
               onTap: () {
-                Navigator.pop(context); // Just close the drawer
+                Navigator.pop(context);
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.logout, // Logout icon
+                color: Colors.blue,
+              ),
               title: Text('Log Out'),
               onTap: () {
                 _logout();
                 Navigator.pop(context);
-                Navigator.pushReplacement(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => LoginForm(),
@@ -280,6 +301,7 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
   }
 
   void searchItems() async {
+    if (!mounted) return;
     String searchText = searchController.text.trim().toLowerCase();
 
     Uri url = Uri.parse(

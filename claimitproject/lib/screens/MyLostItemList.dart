@@ -61,6 +61,17 @@ class _MyItemListState extends State<MyItemList> {
         List<Item> loadedItems =
             data.map((item) => Item.fromJson(item)).toList();
 
+        for (var item in loadedItems) {
+          print('Item loaded:');
+          print('Name: ${item.name}');
+          print('Category: ${item.category}');
+          print('Color: ${item.color}');
+          print('Location: ${item.location}');
+          print('Description: ${item.description}');
+          print('Image Path: ${item.image_path}');
+          print('No Background Image Path: ${item.nobg_image_path}');
+        }
+
         setState(() {
           itemList = loadedItems;
           isLoading = false;
@@ -157,47 +168,72 @@ class _MyItemListState extends State<MyItemList> {
               decoration: BoxDecoration(
                 color: Color.fromARGB(255, 57, 41, 21),
               ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.person, // Choose an icon from Material Icons
+                    color: Colors.white,
+                    size: 32, // Adjust size as needed
+                  ),
+                  SizedBox(width: 10), // Space between icon and text
+                  Text(
+                    'ClaimIt',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
+              leading: Icon(
+                Icons.home, // Home icon
+                color: Colors.blue, // Set the icon color to blue
+              ),
               title: Text('Home Page'),
               onTap: () {
                 Navigator.pop(context);
+                // Add navigation to the Home Page if needed
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        NewHomePage(user: widget.user), // Pass the user object
+                    builder: (context) => NewHomePage(user: widget.user),
                   ),
                 );
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.folder, // Choose an appropriate icon for 'My Lost Items'
+                color: Colors.blue, // Set the icon color
+              ),
               title: Text('My Lost Items'),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.list, // List icon for Found Items
+                color: Colors.blue,
+              ),
               title: Text('Found Items'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => FoundUserItemPage(
-                        user: widget.user), // Pass the user object
+                    builder: (context) => FoundUserItemPage(user: widget.user),
                   ),
                 );
               },
             ),
             ListTile(
+              leading: Icon(
+                Icons.logout, // Logout icon
+                color: Colors.blue,
+              ),
               title: Text('Log Out'),
               onTap: () {
                 _logout();

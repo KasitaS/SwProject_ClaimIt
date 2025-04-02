@@ -90,19 +90,22 @@ class User implements ItemPoster {
       request.fields['description'] = newItem.description;
 
       // Check if there's an image and add it to the request
-      if (newItem.image_path != null) {
+      if (newItem.image_path != null && newItem.image_path!.isNotEmpty) {
         request.files.add(
           await http.MultipartFile.fromPath(
-            'image_path', newItem.image_path!,
+            'image_path',
+            newItem.image_path!,
             contentType: MediaType('image', 'jpeg'), // Adjust as necessary
           ),
         );
       }
 
-      if (newItem.nobg_image_path != null) {
+      if (newItem.nobg_image_path != null &&
+          newItem.nobg_image_path!.isNotEmpty) {
         request.files.add(
           await http.MultipartFile.fromPath(
-            'nobg_image_path', newItem.nobg_image_path!,
+            'nobg_image_path',
+            newItem.nobg_image_path!,
             contentType: MediaType('image', 'png'), // Adjust as necessary
           ),
         );
@@ -116,7 +119,8 @@ class User implements ItemPoster {
         print('Item uploaded successfully');
         // Handle successful upload
       } else {
-        print('Failed to upload item: ${response.body}');
+        print(
+            'Failed to upload item: ${response.statusCode} - ${response.body}');
       }
     } catch (error) {
       print('Error occurred: $error');

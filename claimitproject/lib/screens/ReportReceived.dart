@@ -220,7 +220,7 @@ class _ReportReceivedState extends State<ReportReceived> {
     String searchText = searchController.text.trim().toLowerCase();
 
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/get_all_found_items?name=$searchText');
+        'http://192.168.1.128:8000/api/get_all_found_items?name=$searchText');
 
     String? token = await getToken();
     final headers = {
@@ -296,7 +296,7 @@ class _ReportReceivedState extends State<ReportReceived> {
     }
 
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/update_item_received/${item.id}/');
+        'http://192.168.1.128:8000/api/update_item_received/${item.id}/');
 
     String? token = await getToken();
     final headers = {
