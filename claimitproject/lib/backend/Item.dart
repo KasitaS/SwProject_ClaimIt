@@ -26,7 +26,7 @@ class Item {
   // Convert JSON to Dart object
   factory Item.fromJson(Map<String, dynamic> json) {
     String baseUrl =
-        "http://192.1688..12828:8000/"; // Change to your actual API URL if different
+        "http://172.20.10.3:8000/"; // Change to your actual API URL if different
 
     return Item(
       id: json['id'],
@@ -45,11 +45,9 @@ class Item {
           ? '$baseUrl${json['nobg_image_path']}' // Add base URL for relative paths
           : json['nobg_image_path'] ?? '',
       extraData: {
-        'owner_name': json['owner_name'] ?? 'Unknown',
-        'owner_email': json['owner_email'] ?? 'Unknown',
+        'claimer_name': json['claimer_name'] ?? 'Unknown',
+        'claimer_email': json['claimer_email'] ?? 'Unknown',
       },
-
-// ✅ Parse ownerEmail
     );
   }
 
@@ -64,7 +62,7 @@ class Item {
       'description': description,
       'image_path': image_path,
       'item_type': itemType,
-      'nobg_image_path': nobg_image_path
+      'nobg_image_path': nobg_image_path,
     };
   }
 }

@@ -5,6 +5,10 @@ import 'package:claimitproject/backend/Search/ColorFilterStrategy.dart';
 import 'package:claimitproject/backend/Search/CompositeSearchStrategy.dart';
 import 'package:claimitproject/backend/Search/LocationFilterStrategy.dart';
 import 'package:claimitproject/backend/Search/SearchStrategy.dart';
+import 'package:claimitproject/screens/FoundAdminItemPage.dart';
+import 'package:claimitproject/screens/AdminHomePage.dart';
+import 'package:claimitproject/screens/LoginForm.dart';
+import 'package:claimitproject/screens/AdminReceiveItemPage.dart';
 import 'package:claimitproject/ui_helper/ItemTile.dart';
 import 'package:flutter/material.dart';
 
@@ -16,11 +20,10 @@ class LostItemPage extends StatefulWidget {
 }
 
 class _LostItemPageState extends State<LostItemPage> {
-
   String? selectedCategory;
   String? selectedColor;
   String? selectedLocation;
- late List<Item> filteredItems = []; // Initialize with an empty list
+  late List<Item> filteredItems = []; // Initialize with an empty list
 
   final List<String> categories = [
     'none',
@@ -56,12 +59,87 @@ class _LostItemPageState extends State<LostItemPage> {
     'Art Faculty',
     'Others'
   ];
+
+  void _logout(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginForm()),
+    );
+  }
+
+  void _navigateToFoundItem(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FoundAdminItemPage()),
+    );
+  }
+
+  void _navigateToDashBaord(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AdminHome()),
+    );
+  }
+
+  void _navigateToReceiveList(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AdminReceiveItemPage()),
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: Colors.brown.shade700),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.admin_panel_settings, size: 40, color: Colors.white),
+                SizedBox(height: 10),
+                Text(
+                  'Admin Panel',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          _buildDrawerItem(Icons.dashboard, 'Dashboard',
+              () => _navigateToDashBaord(context)),
+          _buildDrawerItem(
+              Icons.list, 'Found Items', () => _navigateToFoundItem(context)),
+          _buildDrawerItem(
+              Icons.search, 'Lost Items', () => Navigator.pop(context)),
+          _buildDrawerItem(Icons.check_circle, 'Received Items',
+              () => _navigateToReceiveList(context)),
+          Divider(),
+          _buildDrawerItem(Icons.logout, 'Logout', () => _logout(context)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.blue),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Lost Items'),
       ),
+      drawer: _buildDrawer(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -140,13 +218,11 @@ class _LostItemPageState extends State<LostItemPage> {
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
                 return GestureDetector(
-                  onTap: () =>
-                      _showLostItemOwner(context, filteredItems[index]),
                   child: ItemTile(item: filteredItems[index]),
                 );
               },
             ),
-          ), 
+          ),
         ],
       ),
     );
@@ -184,57 +260,5 @@ class _LostItemPageState extends State<LostItemPage> {
     setState(() {
       filteredItems = filtered;
     });
-  }
-
-  Future<void> _showLostItemOwner(BuildContext context, Item item) async {
-    try {
-      ItemManager itemManager = ItemManager();
-      Map<String, String>? owner = await itemManager.getLostItemOwner(item);
-
-      if (owner != null) {
-        String ownerName = owner['username'] ?? 'Unknown';
-        String ownerEmail = owner['email'] ?? 'Unknown';
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Lost Item Owner'),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Name: $ownerName'),
-                  Text('Email: $ownerEmail'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Close'),
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text('Owner information not found.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Close'),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } catch (e) {
-      print('Error showing lost item owner dialog: $e');
-    }
   }
 }

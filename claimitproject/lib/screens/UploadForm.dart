@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:claimitproject/backend/Item.dart';
 import 'package:claimitproject/backend/ItemPoster.dart';
 import 'package:claimitproject/backend/ObjDetection_API.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:typed_data';
-//import 'package:uuid/uuid.dart';
 
 class UploadForm extends StatefulWidget {
   final ItemPoster itemPoster;
@@ -24,19 +22,26 @@ class _UploadFormState extends State<UploadForm> {
   String? selectedCategory;
   String? selectedLocation;
   String name = '';
-  String color = '';
+  List<String> selectedColors = []; // List to hold selected colors
   String description = '';
   bool isLoading = false;
-
-  final _conName = TextEditingController();
-  final _conColor = TextEditingController();
-  final _conLocation = TextEditingController();
-  final _conCategory = TextEditingController();
-  final _conDescription = TextEditingController();
-
   File? _selectedImage;
 
-  @override
+  final List<String> colors = [
+    'Red',
+    'Green',
+    'Blue',
+    'Yellow',
+    'Black',
+    'White',
+    'Purple',
+    'Orange'
+  ];
+
+  final _conName = TextEditingController();
+  final _conLocation = TextEditingController();
+  final _conDescription = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,9 +78,7 @@ class _UploadFormState extends State<UploadForm> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            _pickImageFromGallery();
-                          },
+                          onPressed: _pickImageFromGallery,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color.fromARGB(255, 57, 41, 21),
                           ),
@@ -86,9 +89,7 @@ class _UploadFormState extends State<UploadForm> {
                         ),
                         SizedBox(width: 8.0),
                         ElevatedButton(
-                          onPressed: () {
-                            _openCamera();
-                          },
+                          onPressed: _openCamera,
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Color.fromARGB(255, 57, 41, 21)),
                           child: Text(
@@ -99,11 +100,51 @@ class _UploadFormState extends State<UploadForm> {
                       ],
                     ),
                     SizedBox(height: 16),
-                    SizedBox(width: 8),
-                    GetTextFormField(
-                      controller: _conColor,
-                      hintName: 'Color',
-                      icon: Icons.palette,
+                    // Horizontal scrollable list of color buttons
+                    Container(
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: colors.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (selectedColors.contains(colors[index])) {
+                                  selectedColors.remove(colors[index]);
+                                } else {
+                                  selectedColors.add(colors[index]);
+                                }
+                              });
+                            },
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 4.0),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12.0, vertical: 8.0),
+                              decoration: BoxDecoration(
+                                color: selectedColors.contains(colors[index])
+                                    ? Colors.grey[300]
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.black,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  colors[index],
+                                  style: TextStyle(
+                                    color:
+                                        selectedColors.contains(colors[index])
+                                            ? Colors.black
+                                            : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                     SizedBox(height: 16),
                     GetTextFormField(
@@ -161,9 +202,7 @@ class _UploadFormState extends State<UploadForm> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            _uploadItem();
-                          },
+                          onPressed: _uploadItem,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color.fromARGB(255, 57, 41, 21),
                           ),
@@ -254,14 +293,15 @@ class _UploadFormState extends State<UploadForm> {
     }
   }
 
-  //upload part starts
+  // Upload part starts
   Future<void> _uploadItem() async {
     if (_selectedImage == null ||
         selectedCategory == null ||
         selectedLocation == null ||
         _conName.text.isEmpty ||
         _conDescription.text.isEmpty ||
-        _conColor.text.isEmpty) {
+        selectedColors.isEmpty) {
+      // Ensure at least one color is selected
       // Display an error message or alert the user about missing information
       return;
     }
@@ -277,10 +317,9 @@ class _UploadFormState extends State<UploadForm> {
 
     Item item = Item(
       name: _conName.text,
-      category: selectedCategory ??
-          'Unknown', // Joining selected colors into a string
+      category: selectedCategory ?? 'Unknown',
       location: selectedLocation ?? 'Unknown',
-      color: _conColor.text,
+      color: selectedColors.join(', '), // Join selected colors into a string
       description: _conDescription.text,
       image_path: _selectedImage!.path,
       itemType: itemType,
@@ -304,21 +343,39 @@ class _UploadFormState extends State<UploadForm> {
 
   void _showSuccessDialog() {
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
+      context: context,
+      builder: (BuildContext context) {
+        if (widget.itemPoster is User) {
           return AlertDialog(
             title: Text('Upload Successful'),
-            content: Text('Your item has been successfully uploaded'),
+            content: Text(
+                'Please check the recommendation page to see the similar item, if any.'),
             actions: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(); // Go back to the previous page
                 },
                 child: Text('OK'),
               ),
             ],
           );
-        });
+        } else {
+          return AlertDialog(
+            title: Text('Upload Successful'),
+            content: Text('Your item has been successfully uploaded.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(); // Go back to the previous page
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        }
+      },
+    );
   }
 }

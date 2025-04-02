@@ -1,29 +1,13 @@
 import 'dart:convert';
-
-import 'package:claimitproject/backend/EmailSender.dart';
 import 'package:claimitproject/backend/Item.dart';
 import 'package:claimitproject/backend/ItemPoster.dart';
-import 'package:claimitproject/backend/auth_service.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
-import 'dart:convert';
-import 'dart:convert';
+import 'EmailSender.dart';
 
-import 'package:claimitproject/backend/Item.dart';
-import 'package:claimitproject/backend/ItemPoster.dart';
-import 'package:claimitproject/backend/auth_service.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:claimitproject/backend/EmailSender.dart';
-import 'dart:convert';
-import 'dart:io';
-import 'package:http_parser/http_parser.dart';
-
-class ItemManager implements ItemPoster {
+class ItemManager extends ItemPoster {
   final String username;
   final String email;
   final String adminCode;
-  final String apiUrl = 'http://172.20.10.3:8000/api/item_counts/';
 
   ItemManager({
     this.username = '', // Provide a default value if needed
@@ -37,204 +21,6 @@ class ItemManager implements ItemPoster {
       email: json['email'] ?? '',
       adminCode: json['admincode'] ?? '',
     );
-  }
-  @override
-  Future<void> post(Item newItem) async {
-    final url = Uri.parse('http://172.20.10.3:8000/api/items/');
-    final token = await getToken(); // Retrieve the token
-
-    if (token == null) {
-      print('No authentication token found. Please log in again.');
-      return; // Exit early if there's no token
-    }
-
-    try {
-      var request = http.MultipartRequest('POST', url);
-      request.headers['Authorization'] = "Bearer $token";
-
-      // Ensure all required fields are added
-      request.fields['name'] = newItem.name; // Add the name
-      request.fields['category'] = newItem.category; // Add the category
-      request.fields['color'] = newItem.color; // Add the color
-      request.fields['location'] = newItem.location; // Add the location
-      request.fields['item_type'] = newItem.itemType; // Add the item type
-      request.fields['description'] = newItem.description;
-
-      // Check if there's an image and add it to the request
-      if (newItem.image_path != null && newItem.image_path!.isNotEmpty) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'image_path',
-            newItem.image_path!,
-            contentType: MediaType('image', 'jpeg'), // Adjust as necessary
-          ),
-        );
-      }
-
-      if (newItem.nobg_image_path != null &&
-          newItem.nobg_image_path!.isNotEmpty) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'nobg_image_path',
-            newItem.nobg_image_path!,
-            contentType: MediaType('image', 'png'), // Adjust as necessary
-          ),
-        );
-      }
-
-      // Send request
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 201) {
-        print('Item uploaded successfully');
-        // Handle successful upload
-      } else {
-        print(
-            'Failed to upload item: ${response.statusCode} - ${response.body}');
-      }
-    } catch (error) {
-      print('Error occurred: $error');
-    }
-  }
-
-  Future<List<Item>> matchAndNotify(Item matchItem) async {
-    final colorSimilarityUrl =
-        Uri.parse('http://172.20.10.3:8001/color_similarity/');
-    final imageSimilarityUrl =
-        Uri.parse('http://172.20.10.3:8001/image_similarity/');
-    final getFoundItemUri = Uri.parse(
-        'http://172.20.10.3:8000/api/lost-items/?category=${matchItem.category}');
-
-    List<Item> matchedItems = [];
-
-    try {
-      // Fetch found items
-      final response = await http.get(getFoundItemUri);
-      if (response.statusCode != 200) {
-        print('Failed to retrieve lost items: ${response.statusCode}');
-        return [];
-      }
-
-      List<Item> foundItems = (json.decode(response.body) as List)
-          .map((item) => Item.fromJson(item))
-          .toList();
-
-      if (matchItem.nobg_image_path == null ||
-          !File(matchItem.nobg_image_path!).existsSync()) {
-        print('Skipping match item due to missing nobg_image_path.');
-        return matchedItems;
-      }
-
-      // Read match item image file once
-      var matchFile = await http.MultipartFile.fromPath(
-          'file1', matchItem.nobg_image_path!);
-      var matchFile2 = await http.MultipartFile.fromPath(
-          'file1', matchItem.nobg_image_path!);
-
-      for (var foundItem in foundItems) {
-        if (foundItem.nobg_image_path == null ||
-            !File(foundItem.nobg_image_path!).existsSync()) {
-          print(
-              'Skipping found item ${foundItem.name} due to missing nobg_image_path.');
-          continue;
-        }
-
-        // Read found item image file
-        var foundFile = await http.MultipartFile.fromPath(
-            'file2', foundItem.nobg_image_path!);
-
-        // Check color similarity
-
-        var colorRequest = http.MultipartRequest("POST", colorSimilarityUrl)
-          ..files.addAll([matchFile, foundFile]);
-        var colorResponse = await colorRequest.send();
-
-        if (colorResponse.statusCode != 200) {
-          print(
-              'Color similarity check failed for ${foundItem.name}: ${colorResponse.statusCode}');
-          continue;
-        }
-
-        final colorData =
-            json.decode(await colorResponse.stream.bytesToString());
-        print(colorData['similarity']);
-        if (colorData['similarity'] <= 0.50) {
-          print(
-              'Color similarity too low for ${foundItem.name}: ${colorData['similarity']}');
-          continue;
-        }
-
-        var foundFile2 = await http.MultipartFile.fromPath(
-            'file2', foundItem.nobg_image_path!);
-        // Check image similarity
-        var imageRequest = http.MultipartRequest("POST", imageSimilarityUrl)
-          ..files.addAll([matchFile2, foundFile2]);
-        var imageResponse = await imageRequest.send();
-
-        if (imageResponse.statusCode != 200) {
-          print(
-              'Image similarity check failed for ${foundItem.name}: ${imageResponse.statusCode}');
-          continue;
-        }
-
-        final imageData =
-            json.decode(await imageResponse.stream.bytesToString());
-        if (imageData['similarity_score'] >= 0.50) {
-          print('Match found: ${foundItem.name}');
-          matchedItems.add(foundItem);
-        } else {
-          print('It less than');
-        }
-      }
-      return matchedItems;
-    } catch (e) {
-      print('Error in matchAndNotify: $e');
-      return [];
-    }
-  }
-
-  Future<void> sendMatchingItemEmail(String recipientEmail, Item foundItem,
-      Item lostItem, String fsimilarity, String foundItemImagePath) async {
-    try {
-      final emailSender = EmailSender(
-          username: 'gkasita.sst@gmail.com', password: 'nrjo eoym wwit ljym');
-
-      String subject = 'Matching Item Found! Is this yours?';
-      String body = 'Dear User,\n\n'
-          'We have lost a matching item for your found item:\n\n'
-          'Lost Item: ${lostItem.name}\n'
-          'Found Item: ${foundItem.name}\n'
-          'There is a high similarity Score: {$fsimilarity} between these items\n\n'
-          'We have also attached the image. Please kindly check it\n\n'
-          'Please contact us for further details.\n\n'
-          'Regards,\n'
-          'Lost and Found Team';
-
-      await emailSender.sendEmail(
-          recipientEmail, subject, body, foundItemImagePath);
-    } catch (e) {
-      print('Error sending matching item email: $e');
-    }
-  }
-
-  Future<void> matchAndNotifyAndSendEmails(
-      Item matchItem, String recipientEmail) async {
-    List<Item> matchedItems = await matchAndNotify(matchItem);
-
-    if (matchedItems.isNotEmpty) {
-      for (var lostItem in matchedItems) {
-        await sendMatchingItemEmail(
-          recipientEmail,
-          matchItem,
-          lostItem,
-          "High", // Example similarity score, replace with actual score if needed
-          matchItem.nobg_image_path!,
-        );
-      }
-    } else {
-      print("No matching items found.");
-    }
   }
 
   Future<void> saveMarkAsReceived(
@@ -251,6 +37,7 @@ class ItemManager implements ItemPoster {
   }
 
   Future<Map<String, int>> getItemCounts() async {
+    final String apiUrl = 'http://172.20.10.3:8000/api/item_counts/';
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -266,6 +53,114 @@ class ItemManager implements ItemPoster {
     } catch (e) {
       print('Error fetching item counts: $e');
       return {'lost_count': 0, 'found_count': 0, 'received_count': 0};
+    }
+  }
+
+  Future<List<Item>> compareImages(Item lostItem, List<Item> foundItems) async {
+    List<Item> similarItems = [];
+
+    for (var foundItem in foundItems) {
+      // Check if the image path for both images is not null and not empty
+      if (lostItem.nobg_image_path != null &&
+          lostItem.nobg_image_path!.isNotEmpty &&
+          foundItem.nobg_image_path != null &&
+          foundItem.nobg_image_path!.isNotEmpty) {
+        double similarityScore = await getSimilarity(
+            'http://172.20.10.3:8000/api/get_image_file/?image_path=${lostItem.nobg_image_path!}', // Get image URL for lost item
+            'http://172.20.10.3:8000/api/get_image_file/?image_path=${foundItem.nobg_image_path!}'); // Get image URL for found item
+
+        if (similarityScore > 0.70) {
+          similarItems.add(foundItem);
+        }
+      }
+    }
+
+    return similarItems; // Return the filtered items
+  }
+
+  Future<double> getSimilarity(
+      String lostItemImageUrl, String foundItemImageUrl) async {
+    final String fastApiUrl = 'http://172.20.10.3:8001/image_similarity/';
+    try {
+      // Fetch the images from the provided URLs
+      var lostImageResponse = await http.get(Uri.parse(lostItemImageUrl));
+      var foundImageResponse = await http.get(Uri.parse(foundItemImageUrl));
+
+      if (lostImageResponse.statusCode == 200 &&
+          foundImageResponse.statusCode == 200) {
+        // Prepare the request for similarity comparison
+        var request = http.MultipartRequest("POST", Uri.parse(fastApiUrl));
+        request.files.add(http.MultipartFile.fromBytes(
+            "file1", lostImageResponse.bodyBytes,
+            filename: "lost.png"));
+        request.files.add(http.MultipartFile.fromBytes(
+            "file2", foundImageResponse.bodyBytes,
+            filename: "found.png"));
+
+        var response = await request.send();
+        var responseData = await response.stream.bytesToString();
+        var jsonData = json.decode(responseData);
+
+        return jsonData[
+            "similarity_score"]; // Assuming the response structure has similarity_score
+      }
+    } catch (e) {
+      print("Error getting similarity: $e");
+    }
+    return 0.0; // Return low similarity if error occurs
+  }
+
+  @override
+  Future<void> findSimilarityAndNotify(Item newItem) async {
+    // Fetch lost items with the same category and location
+    final String apiUrl =
+        'http://172.20.10.3:8000/api/lost-items/?category=${newItem.category}&location=${newItem.location}';
+    List<Item> similarItems = [];
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        List<Item> lostItems =
+            data.map((jsonItem) => Item.fromJson(jsonItem)).toList();
+
+        // Compare images with existing lost items
+        for (var lostItem in lostItems) {
+          if (newItem.nobg_image_path != null &&
+              newItem.nobg_image_path!.isNotEmpty &&
+              lostItem.nobg_image_path != null &&
+              lostItem.nobg_image_path!.isNotEmpty) {
+            double similarityScore = await getSimilarity(
+                'http://172.20.10.3:8000/api/get_image_file/?image_path=${newItem.nobg_image_path!}',
+                'http://172.20.10.3:8000/api/get_image_file/?image_path=${lostItem.nobg_image_path!}');
+
+            if (similarityScore > 0.70) {
+              similarItems.add(lostItem); // Add to similar items list
+            }
+          }
+        }
+
+        // If similar items are found, send an email notification
+        if (similarItems.isNotEmpty) {
+          // Assuming that you have the email and username of the user
+          String recipientEmail =
+              'user@example.com'; // Replace with actual email
+          String subject = 'Similar Lost Item Found!';
+          String body = 'We found items similar to yours:\n\n';
+          for (var item in similarItems) {
+            body += 'Name: ${item.name}, Location: ${item.location}\n';
+          }
+          EmailSender emailSender = EmailSender(
+              username: 'gkasita.sst@gmail.com',
+              password: 'nrjo eoym wwit ljym');
+          await emailSender.sendEmail(
+              recipientEmail, subject, body, newItem.nobg_image_path!);
+        }
+      } else {
+        print('Failed to fetch lost items: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching lost items: $e');
     }
   }
 }

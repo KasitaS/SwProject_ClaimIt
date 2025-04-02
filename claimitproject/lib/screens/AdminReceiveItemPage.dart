@@ -87,16 +87,25 @@ class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
                                   style: TextStyle(color: Colors.black87)),
                               SizedBox(height: 4),
                               Text(
-                                  'Owner: ${item.extraData?['owner_name'] ?? 'Unknown'}',
+                                  'Claimer: ${item.extraData?['claimer_name'] ?? 'Unknown'}',
                                   style:
                                       TextStyle(fontWeight: FontWeight.w500)),
                               Text(
-                                  'Email: ${item.extraData?['owner_email'] ?? 'N/A'}',
+                                  'Email: ${item.extraData?['claimer_email'] ?? 'N/A'}',
                                   style: TextStyle(color: Colors.black54)),
                             ],
                           ),
-                          leading: Icon(Icons.check_circle,
-                              color: Colors.green, size: 32),
+                          leading: item.image_path != null
+                              ? Image.network(
+                                  'http://172.20.10.3:8000/api/get_image_file/?image_path=${item.image_path!}',
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Icon(Icons.image_not_supported,
+                                          size: 50, color: Colors.grey),
+                                )
+                              : Icon(Icons.image, size: 50, color: Colors.grey),
                           tileColor: Colors.white,
                         ),
                       );

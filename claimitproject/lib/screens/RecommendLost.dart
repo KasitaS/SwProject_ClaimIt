@@ -65,7 +65,6 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
   }
 
   Future<void> compareImages(List<Item> foundItems) async {
-    print('in here');
     List<Item> similarItems = [];
 
     for (var foundItem in foundItems) {

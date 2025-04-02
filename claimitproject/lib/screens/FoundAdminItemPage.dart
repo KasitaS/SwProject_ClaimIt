@@ -11,7 +11,10 @@ import 'package:claimitproject/backend/auth_service.dart';
 import 'package:claimitproject/ui_helper/ItemTile.dart';
 import 'package:claimitproject/screens/LoginForm.dart';
 import 'package:claimitproject/screens/NewHomePage.dart';
+import 'package:claimitproject/screens/AdminHomePage.dart';
 import 'package:claimitproject/screens/MyLostItemList.dart';
+import 'package:claimitproject/screens/LostItemPage.dart';
+import 'package:claimitproject/screens/AdminReceiveItemPage.dart';
 import 'package:claimitproject/backend/User.dart';
 
 class FoundAdminItemPage extends StatefulWidget {
@@ -68,6 +71,79 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
     'Others'
   ];
 
+  void _logout(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginForm()),
+    );
+  }
+
+  void _navigateToLostItems(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LostItemPage()),
+    );
+  }
+
+  void _navigateToDashBaord(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AdminHome()),
+    );
+  }
+
+  void _navigateToReceiveList(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AdminReceiveItemPage()),
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: Colors.brown.shade700),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.admin_panel_settings, size: 40, color: Colors.white),
+                SizedBox(height: 10),
+                Text(
+                  'Admin Panel',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          _buildDrawerItem(Icons.dashboard, 'Dashboard',
+              () => _navigateToDashBaord(context)),
+          _buildDrawerItem(
+              Icons.list, 'Found Items', () => Navigator.pop(context)),
+          _buildDrawerItem(
+              Icons.search, 'Lost Items', () => _navigateToLostItems(context)),
+          _buildDrawerItem(Icons.check_circle, 'Received Items',
+              () => _navigateToReceiveList(context)),
+          Divider(),
+          _buildDrawerItem(Icons.logout, 'Logout', () => _logout(context)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.blue),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Use a default user if none is provided
@@ -79,6 +155,7 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
         title: const Text('Found Items'),
         backgroundColor: Color.fromARGB(255, 240, 225, 207),
       ),
+      drawer: _buildDrawer(),
       body: Column(
         children: [
           Padding(
@@ -242,12 +319,5 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
         displayedItems = [];
       });
     }
-  }
-
-  void _logout() {
-    // Implement logout functionality here, such as clearing tokens
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => LoginForm()),
-    );
   }
 }
