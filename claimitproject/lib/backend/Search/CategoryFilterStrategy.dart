@@ -15,13 +15,13 @@ class CategoryFilterStrategy implements SearchStrategy {
   Future<List<Item>> filterItems() async {
     String endpoint = itemType == 'Lost' ? 'lost-items' : 'found-items';
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/$endpoint/?category=$category&item_type=$itemType');
+        'http://172.20.10.5:8000/api/$endpoint/?category=$category&item_type=$itemType');
 
     String? token = await getToken();
 
     final headers = {
-      'Authorization': 'Bearer $token', // Add the token to the headers
-      'Content-Type': 'application/json', // Specify content type
+      'Authorization': 'Bearer $token', 
+      'Content-Type': 'application/json', 
     };
 
     final response = await http.get(url, headers: headers);

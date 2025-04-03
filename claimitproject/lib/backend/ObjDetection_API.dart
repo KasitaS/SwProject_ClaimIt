@@ -12,7 +12,7 @@ class APIService {
   static APIService get instance => _instance;
 
   Future<Uint8List> remove_bg(String image1Path) async {
-    var uri = Uri.parse("http://172.20.10.3:8001/remove_background/");
+    var uri = Uri.parse("http://172.20.10.5:8001/remove_background/");
     var request = http.MultipartRequest("POST", uri);
 
     var image1File = await http.MultipartFile.fromPath('file', image1Path);
@@ -24,7 +24,7 @@ class APIService {
   }
 
   Future<String> getDetected(String image1Path) async {
-    var uri = Uri.parse("http://172.20.10.3:8001/get_detected/");
+    var uri = Uri.parse("http://172.20.10.5:8001/get_detected/");
     var request = http.MultipartRequest("POST", uri);
 
     var image1File = await http.MultipartFile.fromPath('file', image1Path);

@@ -336,7 +336,7 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
     String searchText = searchController.text.trim().toLowerCase();
 
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/get_all_found_items?name=$searchText');
+        'http://172.20.10.5:8000/api/get_all_found_items?name=$searchText');
 
     String? token = await getToken();
     final headers = {

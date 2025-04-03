@@ -51,7 +51,7 @@ Future<String?> refreshAccessToken() async {
   }
 
   final response = await http.post(
-    Uri.parse('http://172.20.10.3:8000/api/token/refresh/'),
+    Uri.parse('http://172.20.10.5:8000/api/token/refresh/'),
     headers: {'Content-Type': 'application/json'},
     body: json.encode({'refresh': refreshToken}),
   );

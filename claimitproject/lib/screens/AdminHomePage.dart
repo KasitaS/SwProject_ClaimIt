@@ -195,7 +195,7 @@ class _AdminHomeState extends State<AdminHome> {
                 SizedBox(width: 5),
                 Expanded(
                     child: _buildCountCard('Receive', receivedItemCount,
-                        Colors.blue, Icons.mark_chat_read)),
+                        Colors.blue, Icons.check_circle)),
               ],
             ),
             SizedBox(height: 20),

@@ -28,10 +28,9 @@ class _LoginFormState extends State<LoginForm> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Background Image Section
             Container(
               height: MediaQuery.of(context).size.height *
-                  0.30, // Adjust height dynamically
+                  0.30, 
               width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -40,8 +39,6 @@ class _LoginFormState extends State<LoginForm> {
                 ),
               ),
             ),
-
-            // Login Form Section
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10.0),
@@ -50,7 +47,7 @@ class _LoginFormState extends State<LoginForm> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    genLoginSignUpHeader(), // Logo & Text
+                    genLoginSignUpHeader(), 
                     SizedBox(height: 10.0),
 
                     GetTextFormField(

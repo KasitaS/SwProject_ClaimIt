@@ -16,7 +16,7 @@ class ColorFilterStrategy implements SearchStrategy {
     // Construct the URL with query parameters
     String endpoint = itemType == 'Lost' ? 'lost-items' : 'found-items';
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/$endpoint/?color=$color&item_type=$itemType');
+        'http://172.20.10.5:8000/api/$endpoint/?color=$color&item_type=$itemType');
 
     // Retrieve the token
     String? token = await getToken();

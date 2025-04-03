@@ -67,7 +67,7 @@ class _ReportReceivedState extends State<ReportReceived> {
                       borderRadius: BorderRadius.circular(8),
                       child: item.image_path != null
                           ? Image.network(
-                              'http://172.20.10.3:8000/api/get_image_file/?image_path=${item.image_path!}',
+                              'http://172.20.10.5:8000/api/get_image_file/?image_path=${item.image_path!}',
                               width: 70,
                               height: 70,
                               fit: BoxFit.cover,
@@ -115,7 +115,7 @@ class _ReportReceivedState extends State<ReportReceived> {
   void searchItems() async {
     String searchText = searchController.text.trim().toLowerCase();
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/get_all_found_items?name=$searchText');
+        'http://172.20.10.5:8000/api/get_all_found_items?name=$searchText');
     String? token = await getToken();
     final headers = {
       'Authorization': 'Bearer $token',
@@ -169,7 +169,7 @@ class _ReportReceivedState extends State<ReportReceived> {
 
   void updateItemReceived(Item item) async {
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/update_item_received/${item.id}/');
+        'http://172.20.10.5:8000/api/update_item_received/${item.id}/');
     String? token = await getToken();
     final headers = {
       'Authorization': 'Bearer $token',

@@ -32,7 +32,8 @@ dependencies:
     sdk: flutter
   http: ^1.2.2
   mailer: ^5.0.0
-  fl_chart: ^0.70.2
+  fl_chart: ^0.68.0 
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -41,7 +42,7 @@ dependencies:
   image_picker: ^1.1.2
   flutter_slidable: ^3.1.1
   shared_preferences: ^2.1.1
-  path_provider: ^2.1.5
+  path_provider: ^2.1.4
 
 dev_dependencies:
   flutter_test:

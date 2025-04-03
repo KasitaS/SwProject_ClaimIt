@@ -9,6 +9,7 @@ class Item {
   final String itemType;
   final String? nobg_image_path;
   final Map<String, dynamic>? extraData;
+  final String? owner;
 
   Item({
     this.id,
@@ -21,12 +22,13 @@ class Item {
     required this.itemType,
     this.nobg_image_path,
     this.extraData,
+    this.owner,
   });
 
   // Convert JSON to Dart object
   factory Item.fromJson(Map<String, dynamic> json) {
     String baseUrl =
-        "http://172.20.10.3:8000/"; // Change to your actual API URL if different
+        "http://172.20.10.5:8000/"; // Change to your actual API URL if different
 
     return Item(
       id: json['id'],
@@ -48,6 +50,9 @@ class Item {
         'claimer_name': json['claimer_name'] ?? 'Unknown',
         'claimer_email': json['claimer_email'] ?? 'Unknown',
       },
+      owner: json['owner'] is Map<String, dynamic>
+          ? json['owner']['email'] ?? 'Unknown' // or use json['owner']['name']
+          : json['owner'] ?? 'Unknown',
     );
   }
 
@@ -63,6 +68,7 @@ class Item {
       'image_path': image_path,
       'item_type': itemType,
       'nobg_image_path': nobg_image_path,
+      'owner': owner, 
     };
   }
 }

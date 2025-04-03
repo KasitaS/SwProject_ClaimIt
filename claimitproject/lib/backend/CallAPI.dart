@@ -1,17 +1,18 @@
 import 'dart:convert';
+import 'package:claimitproject/backend/Item.dart';
 import 'package:http/http.dart' as http;
 import 'package:claimitproject/backend/User.dart';
 import 'package:claimitproject/backend/auth_service.dart';
 
 class CallAPI {
-  static const String _loginUrl = 'http://172.20.10.3:8000/api';
-  static const String _signupUrl = 'http://172.20.10.3:8000/api';
+  static const String _mainUrl = 'http://172.20.10.5:8000/api';
+
 
   bool _isLoading = false;
 
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
-    final url = Uri.parse('$_loginUrl/login/');
+    final url = Uri.parse('$_mainUrl/login/');
 
     try {
       final response = await http.post(
@@ -53,7 +54,7 @@ class CallAPI {
 
   static Future<Map<String, dynamic>> signUp(
       String username, String email, String password) async {
-    var url = Uri.parse('$_signupUrl/register/');
+    var url = Uri.parse('$_mainUrl/register/');
     var response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -73,4 +74,56 @@ class CallAPI {
       };
     }
   }
+
+  static Future<Map<String, dynamic>> verifyAdminCode(String adminCode) async {
+    final url = Uri.parse('$_mainUrl/verify_admin_code/');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"admincode": adminCode}),
+      );
+
+      if (response.statusCode == 200) {
+        return {"success": true};
+      } else {
+        return {"success": false, "message": "Incorrect Verification Code"};
+      }
+    } catch (e) {
+      return {"success": false, "message": "An error occurred: ${e.toString()}"};
+    }
+  }
+
+  static Future<Map<String, dynamic>> fetchReceivedItems() async {
+    final Uri url = Uri.parse('$_mainUrl/received_items/');
+
+    try {
+      final token = await getToken(); // Fetch token from auth service
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<Item> items = (json.decode(response.body) as List)
+            .map((item) => Item.fromJson(item))
+            .toList();
+        return {"success": true, "items": items};
+      } else {
+        return {"success": false, "message": "Failed to retrieve received items."};
+      }
+    } catch (e) {
+      return {"success": false, "message": "An error occurred: ${e.toString()}"};
+    }
+  }
+
+  
+
+
+  
+
 }

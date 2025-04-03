@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:claimitproject/backend/CallAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../backend/auth_service.dart';
@@ -14,8 +15,6 @@ class AdminReceiveItemPage extends StatefulWidget {
 
 class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
   List<Item> receivedItems = [];
-  final Uri getReceivedItemUri =
-      Uri.parse('http://172.20.10.3:8000/api/received_items/');
   bool itemsFetched = false;
 
   @override
@@ -25,20 +24,20 @@ class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
   }
 
   Future<void> fetchReceivedItems() async {
-    try {
-      final response = await http.get(getReceivedItemUri);
-      if (response.statusCode == 200) {
-        setState(() {
-          receivedItems = (json.decode(response.body) as List)
-              .map((item) => Item.fromJson(item))
-              .toList();
-          itemsFetched = true;
-        });
-      } else {
-        print('Failed to retrieve received items: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching received items: $e');
+    var result = await CallAPI.fetchReceivedItems();
+
+    if (result["success"]) {
+      setState(() {
+        receivedItems = result["items"];
+        itemsFetched = true;
+      });
+    } else {
+      setState(() {
+        itemsFetched = true; 
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result["message"])),
+      );
     }
   }
 
@@ -97,7 +96,7 @@ class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
                           ),
                           leading: item.image_path != null
                               ? Image.network(
-                                  'http://172.20.10.3:8000/api/get_image_file/?image_path=${item.image_path!}',
+                                  'http://172.20.10.5:8000/api/get_image_file/?image_path=${item.image_path!}',
                                   width: 60,
                                   height: 60,
                                   fit: BoxFit.cover,

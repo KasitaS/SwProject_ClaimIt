@@ -22,7 +22,7 @@ class NewHomePage extends StatefulWidget {
 class _NewHomePageState extends State<NewHomePage> {
   List<Item> lostItems = [];
   final Uri getLostItemUri =
-      Uri.parse('http://172.20.10.3:8000/api/lost-items/');
+      Uri.parse('http://172.20.10.5:8000/api/lost-items/');
   bool itemsFetched = false;
 
   @override

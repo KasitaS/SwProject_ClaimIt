@@ -282,7 +282,7 @@ class _FoundAdminItemPageState extends State<FoundAdminItemPage> {
 
   void searchItems() async {
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/get_all_found_items?name=${searchController.text.trim()}');
+        'http://172.20.10.5:8000/api/get_all_found_items?name=${searchController.text.trim()}');
     String? token = await getToken();
     final response = await http.get(url, headers: {
       'Authorization': 'Bearer $token',

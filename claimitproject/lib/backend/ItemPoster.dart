@@ -5,7 +5,7 @@ import 'package:http_parser/http_parser.dart';
 
 abstract class ItemPoster {
   Future<void> post(Item newItem) async {
-    final url = Uri.parse('http://172.20.10.3:8000/api/items/');
+    final url = Uri.parse('http://172.20.10.5:8000/api/items/');
     final token = await getToken(); // Retrieve the token
 
     if (token == null) {

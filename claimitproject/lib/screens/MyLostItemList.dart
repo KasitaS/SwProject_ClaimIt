@@ -45,7 +45,7 @@ class _MyItemListState extends State<MyItemList> {
 
     try {
       final url = Uri.parse(
-          'http://172.20.10.3:8000/api/user-lost-items/${widget.user.username}/');
+          'http://172.20.10.5:8000/api/user-lost-items/${widget.user.username}/');
       final response = await http.get(
         url,
         headers: {
@@ -109,7 +109,7 @@ class _MyItemListState extends State<MyItemList> {
     }
 
     try {
-      final url = Uri.parse('http://172.20.10.3:8000/api/delete_item/');
+      final url = Uri.parse('http://172.20.10.5:8000/api/delete_item/');
       final response = await http.delete(
         url,
         headers: {

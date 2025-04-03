@@ -76,7 +76,6 @@ class _DetailedItemViewState extends State<DetailedItemView> {
                     alignment: Alignment.bottomRight,
                     child: ElevatedButton(
                       onPressed: () {
-                        //saveReceiveButton
                         _saveAndMarkAsReceived(widget.item);
                       },
                       style: ElevatedButton.styleFrom(
@@ -119,34 +118,8 @@ class _DetailedItemViewState extends State<DetailedItemView> {
     );
   }
 
-  // void _saveAndMarkAsReceived(Item newItem) async {
-  //   String name = nameController.text;
-  //   String email = emailController.text;
-
-  //   try {
-  //     DbHelper dbHelper = DbHelper();
-
-  //     // Get the old item type before updating
-  //     String oldItemType = newItem.itemType ?? '';
-
-  //     // Update the item type to 'Received'
-  //     newItem.updateItemType('Received');
-  //     int itemId = await dbHelper.saveItem(newItem);
-  //     await dbHelper.saveReceiveItem(itemId, name, email);
-
-  //     // Delete the item with the old type
-  //     await dbHelper.deleteItemByType(itemId, oldItemType);
-
-  //   } catch (e) {
-  //     print("Error saving: $e");
-  //   }
-  //   _showSuccessDialog();
-  // }
 
   void _saveAndMarkAsReceived(Item newItem) async {
-    /* itemManager.saveMarkAsReceived(
-        newItem, nameController.text, emailController.text);
-    _showSuccessDialog(context); */
   }
 }
 

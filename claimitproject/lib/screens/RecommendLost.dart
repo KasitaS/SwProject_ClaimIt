@@ -17,9 +17,9 @@ class RecommendLostPage extends StatefulWidget {
 
 class _RecommendLostPageState extends State<RecommendLostPage> {
   final String apiUrl =
-      'http://172.20.10.3:8000/api/found-items/'; // Django API endpoint
+      'http://172.20.10.5:8000/api/found-items/'; // Django API endpoint
   final String fastApiUrl =
-      'http://172.20.10.3:8001/image_similarity/'; // FastAPI endpoint
+      'http://172.20.10.5:8001/image_similarity/'; // FastAPI endpoint
   List<Item> filteredItems = [];
   bool isLoading = true;
   String? errorMessage;
@@ -74,8 +74,8 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
           foundItem.nobg_image_path != null &&
           foundItem.nobg_image_path!.isNotEmpty) {
         double similarityScore = await getSimilarity(
-            'http://172.20.10.3:8000/api/get_image_file/?image_path=${(widget.item.nobg_image_path!)}', // Get image URL for lost item
-            'http://172.20.10.3:8000/api/get_image_file/?image_path=${foundItem.nobg_image_path!}'); // Get image URL for found item
+            'http://172.20.10.5:8000/api/get_image_file/?image_path=${(widget.item.nobg_image_path!)}', // Get image URL for lost item
+            'http://172.20.10.5:8000/api/get_image_file/?image_path=${foundItem.nobg_image_path!}'); // Get image URL for found item
 
         if (similarityScore > 0.70) {
           similarItems.add(foundItem);
@@ -141,7 +141,7 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
                           height: 100,
                           child: widget.item.image_path != null
                               ? Image.network(
-                                  'http://172.20.10.3:8000/api/get_image_file/?image_path=${Uri.encodeComponent(widget.item.image_path!)}',
+                                  'http://172.20.10.5:8000/api/get_image_file/?image_path=${Uri.encodeComponent(widget.item.image_path!)}',
                                   width: 100,
                                   height: 100,
                                   fit: BoxFit.cover,

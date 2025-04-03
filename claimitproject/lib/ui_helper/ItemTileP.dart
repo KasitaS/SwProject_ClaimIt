@@ -37,7 +37,7 @@ class ItemTileP extends StatelessWidget {
             ),
             child: item.image_path != null
                 ? Image.network(
-                    'http://172.20.10.3:8000/api/get_image_file/?image_path=${(item.image_path!)}',
+                    'http://172.20.10.5:8000/api/get_image_file/?image_path=${(item.image_path!)}',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,

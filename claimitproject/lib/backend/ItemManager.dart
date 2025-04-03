@@ -37,7 +37,7 @@ class ItemManager extends ItemPoster {
   }
 
   Future<Map<String, int>> getItemCounts() async {
-    final String apiUrl = 'http://172.20.10.3:8000/api/item_counts/';
+    final String apiUrl = 'http://172.20.10.5:8000/api/item_counts/';
     try {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
@@ -66,8 +66,8 @@ class ItemManager extends ItemPoster {
           foundItem.nobg_image_path != null &&
           foundItem.nobg_image_path!.isNotEmpty) {
         double similarityScore = await getSimilarity(
-            'http://172.20.10.3:8000/api/get_image_file/?image_path=${lostItem.nobg_image_path!}', // Get image URL for lost item
-            'http://172.20.10.3:8000/api/get_image_file/?image_path=${foundItem.nobg_image_path!}'); // Get image URL for found item
+            'http://172.20.10.5:8000/api/get_image_file/?image_path=${lostItem.nobg_image_path!}', // Get image URL for lost item
+            'http://172.20.10.5:8000/api/get_image_file/?image_path=${foundItem.nobg_image_path!}'); // Get image URL for found item
 
         if (similarityScore > 0.70) {
           similarItems.add(foundItem);
@@ -80,7 +80,7 @@ class ItemManager extends ItemPoster {
 
   Future<double> getSimilarity(
       String lostItemImageUrl, String foundItemImageUrl) async {
-    final String fastApiUrl = 'http://172.20.10.3:8001/image_similarity/';
+    final String fastApiUrl = 'http://172.20.10.5:8001/image_similarity/';
     try {
       // Fetch the images from the provided URLs
       var lostImageResponse = await http.get(Uri.parse(lostItemImageUrl));
@@ -114,7 +114,7 @@ class ItemManager extends ItemPoster {
   Future<void> findSimilarityAndNotify(Item newItem) async {
     // Fetch lost items with the same category and location
     final String apiUrl =
-        'http://172.20.10.3:8000/api/lost-items/?category=${newItem.category}&location=${newItem.location}';
+        'http://172.20.10.5:8000/api/lost-items/?category=${newItem.category}&location=${newItem.location}';
     List<Item> similarItems = [];
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -131,8 +131,8 @@ class ItemManager extends ItemPoster {
               lostItem.nobg_image_path != null &&
               lostItem.nobg_image_path!.isNotEmpty) {
             double similarityScore = await getSimilarity(
-                'http://172.20.10.3:8000/api/get_image_file/?image_path=${newItem.nobg_image_path!}',
-                'http://172.20.10.3:8000/api/get_image_file/?image_path=${lostItem.nobg_image_path!}');
+                'http://172.20.10.5:8000/api/get_image_file/?image_path=${newItem.nobg_image_path!}',
+                'http://172.20.10.5:8000/api/get_image_file/?image_path=${lostItem.nobg_image_path!}');
 
             if (similarityScore > 0.70) {
               similarItems.add(lostItem); // Add to similar items list
@@ -163,4 +163,21 @@ class ItemManager extends ItemPoster {
       print('Error fetching lost items: $e');
     }
   }
+
+  static Future<List<Item>> fetchLostItems() async {
+  final response = await http.get(Uri.parse('http://172.20.10.5:8000/api/lost-items/'));
+
+  if (response.statusCode == 200) {
+    List jsonResponse = json.decode(response.body);
+    return jsonResponse.map((item) => Item.fromJson(item)).toList();
+  } else {
+    throw Exception('Failed to load lost items');
+  }
+}
+
+
+
+
+
+
 }
