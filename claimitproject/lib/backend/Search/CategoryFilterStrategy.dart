@@ -13,7 +13,7 @@ class CategoryFilterStrategy implements SearchStrategy {
 
   @override
   Future<List<Item>> filterItems() async {
-    String endpoint = itemType == 'Lost' ? 'lost-items' : 'found-items';
+    String endpoint = itemType == 'Lost' ? 'lost-items_filter' : 'found-items';
     Uri url = Uri.parse(
         'http://172.20.10.5:8000/api/$endpoint/?category=$category&item_type=$itemType');
 
