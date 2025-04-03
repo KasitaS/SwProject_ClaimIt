@@ -43,7 +43,9 @@ class ColorFilterStrategy implements SearchStrategy {
 
   Future<List<Item>> filterItemsFromList(List<Item> items) async {
     return items
-        .where((item) => item.color == color && item.itemType == itemType)
+        .where((item) =>
+            item.color.toLowerCase().contains(color.toLowerCase()) &&
+            item.itemType == itemType)
         .toList();
   }
 }

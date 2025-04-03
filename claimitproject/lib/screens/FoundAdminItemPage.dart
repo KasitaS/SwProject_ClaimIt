@@ -10,24 +10,21 @@ import 'package:claimitproject/backend/Search/SearchStrategy.dart';
 import 'package:claimitproject/backend/auth_service.dart';
 import 'package:claimitproject/ui_helper/ItemTile.dart';
 import 'package:claimitproject/screens/LoginForm.dart';
-import 'package:claimitproject/screens/NewHomePage.dart';
 import 'package:claimitproject/screens/AdminHomePage.dart';
-import 'package:claimitproject/screens/MyLostItemList.dart';
 import 'package:claimitproject/screens/LostItemPage.dart';
 import 'package:claimitproject/screens/AdminReceiveItemPage.dart';
 import 'package:claimitproject/backend/User.dart';
 
 class FoundAdminItemPage extends StatefulWidget {
-  final User? user; // Make user optional (nullable)
+  final User? user;
 
-  const FoundAdminItemPage({Key? key, this.user})
-      : super(key: key); // Use optional parameter
+  const FoundAdminItemPage({Key? key, this.user}) : super(key: key);
 
   @override
-  State<FoundAdminItemPage> createState() => _FoundUserItemPageState();
+  State<FoundAdminItemPage> createState() => _FoundAdminItemPageState();
 }
 
-class _FoundUserItemPageState extends State<FoundAdminItemPage> {
+class _FoundAdminItemPageState extends State<FoundAdminItemPage> {
   String? selectedCategory;
   String? selectedColor;
   String? selectedLocation;
@@ -85,7 +82,7 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
     );
   }
 
-  void _navigateToDashBaord(BuildContext context) {
+  void _navigateToDashboard(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AdminHome()),
@@ -122,7 +119,7 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
             ),
           ),
           _buildDrawerItem(Icons.dashboard, 'Dashboard',
-              () => _navigateToDashBaord(context)),
+              () => _navigateToDashboard(context)),
           _buildDrawerItem(
               Icons.list, 'Found Items', () => Navigator.pop(context)),
           _buildDrawerItem(
@@ -146,7 +143,6 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Use a default user if none is provided
     User currentUser = widget.user ??
         User(id: '0', username: 'Guest', email: 'guest@example.com');
 
@@ -162,21 +158,22 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
             padding: const EdgeInsets.all(15),
             child: Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search items...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                if (!showFilters)
+                  Expanded(
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search items...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: const Icon(Icons.search),
                       ),
-                      prefixIcon: const Icon(Icons.search),
+                      onChanged: (value) {
+                        searchItems();
+                      },
                     ),
-                    onChanged: (value) {
-                      searchItems();
-                    },
                   ),
-                ),
                 const SizedBox(width: 8),
                 IconButton(
                   icon: Icon(
@@ -184,78 +181,51 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
                   onPressed: () {
                     setState(() {
                       showFilters = !showFilters;
+                      if (showFilters) {
+                        displayedItems.clear();
+                      }
                     });
                   },
                 ),
+                if (showFilters)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Text(
+                      "Search by Filter",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
               ],
             ),
           ),
-          if (showFilters) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: DropdownButtonFormField<String>(
-                hint: const Text('Category'),
-                value: selectedCategory,
-                items: categories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: showFilters ? 250 : 0,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (showFilters) ...[
+                    _buildDropdown('Category', selectedCategory, categories,
+                        (value) => setState(() => selectedCategory = value)),
+                    _buildDropdown('Color', selectedColor, colors,
+                        (value) => setState(() => selectedColor = value)),
+                    _buildDropdown('Location', selectedLocation, locations,
+                        (value) => setState(() => selectedLocation = value)),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16, top: 8),
+                      child: ElevatedButton(
+                        onPressed: filterItems,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange),
+                        child: const Text('Filter Items'),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: DropdownButtonFormField<String>(
-                hint: const Text('Color'),
-                value: selectedColor,
-                items: colors.map((color) {
-                  return DropdownMenuItem(
-                    value: color,
-                    child: Text(color),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedColor = value;
-                  });
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: DropdownButtonFormField<String>(
-                hint: const Text('Location'),
-                value: selectedLocation,
-                items: locations.map((location) {
-                  return DropdownMenuItem(
-                    value: location,
-                    child: Text(location),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedLocation = value;
-                  });
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16, top: 8),
-              child: ElevatedButton(
-                onPressed: filterItems,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                ),
-                child: const Text('Filter Items'),
-              ),
-            ),
-          ],
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: displayedItems.isNotEmpty
@@ -271,6 +241,21 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDropdown(String hint, String? value, List<String> items,
+      ValueChanged<String?> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: DropdownButtonFormField<String>(
+        hint: Text(hint),
+        value: value,
+        items: items.map((item) {
+          return DropdownMenuItem(value: item, child: Text(item));
+        }).toList(),
+        onChanged: onChanged,
       ),
     );
   }
@@ -291,28 +276,23 @@ class _FoundUserItemPageState extends State<FoundAdminItemPage> {
     List<Item> filtered = await compositeStrategy.filterItems();
     setState(() {
       filteredItems = filtered;
+      displayedItems.clear();
     });
   }
 
   void searchItems() async {
-    if (!mounted) return;
-    String searchText = searchController.text.trim().toLowerCase();
-
     Uri url = Uri.parse(
-        'http://172.20.10.3:8000/api/get_all_found_items?name=$searchText');
-
+        'http://172.20.10.3:8000/api/get_all_found_items?name=${searchController.text.trim()}');
     String? token = await getToken();
-    final headers = {
-      'Authorization': 'Bearer $token', // Add the token to the headers
-      'Content-Type': 'application/json',
-    };
-
-    final response = await http.get(url, headers: headers);
-
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json'
+    });
     if (response.statusCode == 200) {
-      List<dynamic> itemsData = jsonDecode(response.body);
       setState(() {
-        displayedItems = itemsData.map((item) => Item.fromJson(item)).toList();
+        displayedItems = (jsonDecode(response.body) as List)
+            .map((item) => Item.fromJson(item))
+            .toList();
       });
     } else {
       setState(() {

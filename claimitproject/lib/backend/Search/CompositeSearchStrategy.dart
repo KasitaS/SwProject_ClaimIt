@@ -11,13 +11,17 @@ class CompositeSearchStrategy implements SearchStrategy {
 
   @override
   Future<List<Item>> filterItems() async {
-    if (strategies.isEmpty) return [];
+    if (strategies.isEmpty) {
+      return [];
+    }
 
     List<Item> items = await strategies[0].filterItems();
-    if (items.isEmpty) return [];
 
     for (var i = 1; i < strategies.length; i++) {
+      print(items.length);
+      print("in here");
       items = await strategies[i].filterItemsFromList(items);
+      print(items.length);
       if (items.isEmpty) return []; // Stop early
     }
     return items;

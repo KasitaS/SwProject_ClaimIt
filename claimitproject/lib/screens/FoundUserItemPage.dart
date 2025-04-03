@@ -10,7 +10,6 @@ import 'package:claimitproject/backend/Search/SearchStrategy.dart';
 import 'package:claimitproject/backend/auth_service.dart';
 import 'package:claimitproject/ui_helper/ItemTile.dart';
 import 'package:claimitproject/screens/LoginForm.dart';
-import 'package:claimitproject/screens/NewHomePage.dart';
 import 'package:claimitproject/screens/MyLostItemList.dart';
 import 'package:claimitproject/backend/User.dart';
 
@@ -168,100 +167,128 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
             padding: const EdgeInsets.all(15),
             child: Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search items...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                // Show search bar only if filters are not being shown
+                if (!showFilters)
+                  Expanded(
+                    child: TextField(
+                      controller: searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search items...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: const Icon(Icons.search),
                       ),
-                      prefixIcon: const Icon(Icons.search),
+                      onChanged: (value) {
+                        searchItems();
+                      },
                     ),
-                    onChanged: (value) {
-                      searchItems();
-                    },
                   ),
-                ),
                 const SizedBox(width: 8),
                 IconButton(
                   icon: Icon(
                       showFilters ? Icons.filter_list_off : Icons.filter_list),
                   onPressed: () {
                     setState(() {
-                      showFilters = !showFilters;
+                      showFilters = !showFilters; // Toggle filter view
+                      if (showFilters) {
+                        displayedItems
+                            .clear(); // Clear displayed items when filtering
+                      }
                     });
                   },
                 ),
+                if (showFilters)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      "Search by Filter",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
               ],
             ),
           ),
-          if (showFilters) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: DropdownButtonFormField<String>(
-                hint: const Text('Category'),
-                value: selectedCategory,
-                items: categories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height:
+                showFilters ? 250 : 0, // Adjust height based on filter state
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (showFilters) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: DropdownButtonFormField<String>(
+                        hint: const Text('Category'),
+                        value: selectedCategory,
+                        items: categories.map((category) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Text(category),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedCategory = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: DropdownButtonFormField<String>(
+                        hint: const Text('Color'),
+                        value: selectedColor,
+                        items: colors.map((color) {
+                          return DropdownMenuItem(
+                            value: color,
+                            child: Text(color),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedColor = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: DropdownButtonFormField<String>(
+                        hint: const Text('Location'),
+                        value: selectedLocation,
+                        items: locations.map((location) {
+                          return DropdownMenuItem(
+                            value: location,
+                            child: Text(location),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedLocation = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16, top: 8),
+                      child: ElevatedButton(
+                        onPressed: filterItems,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                        ),
+                        child: const Text('Filter Items'),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: DropdownButtonFormField<String>(
-                hint: const Text('Color'),
-                value: selectedColor,
-                items: colors.map((color) {
-                  return DropdownMenuItem(
-                    value: color,
-                    child: Text(color),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedColor = value;
-                  });
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: DropdownButtonFormField<String>(
-                hint: const Text('Location'),
-                value: selectedLocation,
-                items: locations.map((location) {
-                  return DropdownMenuItem(
-                    value: location,
-                    child: Text(location),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedLocation = value;
-                  });
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 16, top: 8),
-              child: ElevatedButton(
-                onPressed: filterItems,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                ),
-                child: const Text('Filter Items'),
-              ),
-            ),
-          ],
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: displayedItems.isNotEmpty
@@ -285,18 +312,22 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
     List<SearchStrategy> strategies = [];
     if (selectedCategory != 'none' && selectedCategory != null) {
       strategies.add(CategoryFilterStrategy(selectedCategory!, 'Found'));
+      print(selectedCategory);
     }
     if (selectedColor != 'none' && selectedColor != null) {
       strategies.add(ColorFilterStrategy(selectedColor!, 'Found'));
+      print(selectedColor);
     }
     if (selectedLocation != 'none' && selectedLocation != null) {
       strategies.add(LocationFilterStrategy(selectedLocation!, 'Found'));
+      print(selectedLocation);
     }
     CompositeSearchStrategy compositeStrategy =
         CompositeSearchStrategy(strategies, itemType: ItemType.Found);
     List<Item> filtered = await compositeStrategy.filterItems();
     setState(() {
       filteredItems = filtered;
+      displayedItems = []; // Clear displayed items when filtering
     });
   }
 
