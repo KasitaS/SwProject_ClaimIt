@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'package:claimitproject/backend/Item.dart';
 import 'package:claimitproject/backend/ItemManager.dart';
 import 'package:claimitproject/backend/Search/CategoryFilterStrategy.dart';
@@ -30,11 +30,29 @@ class _LostItemPageState extends State<LostItemPage> {
   ];
   final List<String> colors = [
     'none',
-    'Red', 'Green', 'Blue', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Black', 'White', 'Gray', 'Others'
+    'Red',
+    'Green',
+    'Blue',
+    'Yellow',
+    'Orange',
+    'Purple',
+    'Pink',
+    'Brown',
+    'Black',
+    'White',
+    'Gray',
+    'Others'
   ];
   final List<String> locations = [
     'none',
-    'HM Building', 'ECC Building', 'Engineering Faculty', 'Architect Faculty', 'Science Faculty', 'Business Faculty', 'Art Faculty', 'Others'
+    'HM Building',
+    'ECC Building',
+    'Engineering Faculty',
+    'Architect Faculty',
+    'Science Faculty',
+    'Business Faculty',
+    'Art Faculty',
+    'Others'
   ];
 
   @override
@@ -99,7 +117,8 @@ class _LostItemPageState extends State<LostItemPage> {
           children: [
             Card(
               elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
@@ -108,29 +127,46 @@ class _LostItemPageState extends State<LostItemPage> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
+                            decoration: InputDecoration(
+                                labelText: 'Category',
+                                border: OutlineInputBorder()),
                             value: selectedCategory,
-                            items: categories.map((category) => DropdownMenuItem(value: category, child: Text(category))).toList(),
-                            onChanged: (value) => setState(() => selectedCategory = value),
+                            items: categories
+                                .map((category) => DropdownMenuItem(
+                                    value: category, child: Text(category)))
+                                .toList(),
+                            onChanged: (value) =>
+                                setState(() => selectedCategory = value),
                           ),
                         ),
                         SizedBox(width: 6),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(labelText: 'Color', border: OutlineInputBorder()),
+                            decoration: InputDecoration(
+                                labelText: 'Color',
+                                border: OutlineInputBorder()),
                             value: selectedColor,
-                            items: colors.map((color) => DropdownMenuItem(value: color, child: Text(color))).toList(),
-                            onChanged: (value) => setState(() => selectedColor = value),
+                            items: colors
+                                .map((color) => DropdownMenuItem(
+                                    value: color, child: Text(color)))
+                                .toList(),
+                            onChanged: (value) =>
+                                setState(() => selectedColor = value),
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      decoration: InputDecoration(labelText: 'Location', border: OutlineInputBorder()),
+                      decoration: InputDecoration(
+                          labelText: 'Location', border: OutlineInputBorder()),
                       value: selectedLocation,
-                      items: locations.map((location) => DropdownMenuItem(value: location, child: Text(location))).toList(),
-                      onChanged: (value) => setState(() => selectedLocation = value),
+                      items: locations
+                          .map((location) => DropdownMenuItem(
+                              value: location, child: Text(location)))
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => selectedLocation = value),
                     ),
                     SizedBox(height: 8),
                     Row(
@@ -138,7 +174,8 @@ class _LostItemPageState extends State<LostItemPage> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: filterItems,
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange),
                             child: Text('Filter'),
                           ),
                         ),
@@ -146,7 +183,8 @@ class _LostItemPageState extends State<LostItemPage> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: clearFilters,
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent),
                             child: Text('Clear'),
                           ),
                         ),
@@ -159,7 +197,10 @@ class _LostItemPageState extends State<LostItemPage> {
             SizedBox(height: 10),
             Expanded(
               child: filteredItems.isEmpty
-                  ? Center(child: Text("No items found", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))
+                  ? Center(
+                      child: Text("No items found",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)))
                   : ListView.builder(
                       itemCount: filteredItems.length,
                       itemBuilder: (context, index) {
@@ -167,17 +208,24 @@ class _LostItemPageState extends State<LostItemPage> {
                         return Card(
                           elevation: 3,
                           margin: EdgeInsets.symmetric(vertical: 5),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(currentItem.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                Text(currentItem.name,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold)),
                                 Text("Category: ${currentItem.category}"),
                                 Text("Color: ${currentItem.color}"),
                                 Text("Location: ${currentItem.location}"),
-                                Text("Posted by: ${currentItem.owner ?? 'Unknown'}", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+                                Text("Posted by: ${currentItem.owner ?? 'Unknown'}",
+                                    style: TextStyle(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),

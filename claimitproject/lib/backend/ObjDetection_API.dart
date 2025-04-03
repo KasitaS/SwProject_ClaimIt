@@ -2,13 +2,11 @@ import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 
 class APIService {
-  // Private constructor to prevent external instantiation
   APIService._();
 
   // Singleton instance variable
   static final APIService _instance = APIService._();
 
-  // Getter to access the singleton instance
   static APIService get instance => _instance;
 
   Future<Uint8List> remove_bg(String image1Path) async {
@@ -20,7 +18,7 @@ class APIService {
     request.files.add(image1File);
     var streamedResponse = await request.send();
 
-    return await streamedResponse.stream.toBytes(); // Receive image bytes
+    return await streamedResponse.stream.toBytes();
   }
 
   Future<String> getDetected(String image1Path) async {

@@ -27,8 +27,7 @@ class Item {
 
   // Convert JSON to Dart object
   factory Item.fromJson(Map<String, dynamic> json) {
-    String baseUrl =
-        "http://172.20.10.5:8000/"; // Change to your actual API URL if different
+    String baseUrl = "http://172.20.10.5:8000/";
 
     return Item(
       id: json['id'],
@@ -37,26 +36,25 @@ class Item {
       color: json['color'] ?? '',
       location: json['location'] ?? '',
       description: json['description'] ?? '',
-      image_path: json['image_path'] != null &&
-              json['image_path'].startsWith('/')
-          ? '$baseUrl${json['image_path']}' // Add base URL for relative paths
-          : json['image_path'] ?? '',
+      image_path:
+          json['image_path'] != null && json['image_path'].startsWith('/')
+              ? '$baseUrl${json['image_path']}'
+              : json['image_path'] ?? '',
       itemType: json['item_type'] ?? '',
       nobg_image_path: json['nobg_image_path'] != null &&
               json['nobg_image_path'].startsWith('/')
-          ? '$baseUrl${json['nobg_image_path']}' // Add base URL for relative paths
+          ? '$baseUrl${json['nobg_image_path']}'
           : json['nobg_image_path'] ?? '',
       extraData: {
         'claimer_name': json['claimer_name'] ?? 'Unknown',
         'claimer_email': json['claimer_email'] ?? 'Unknown',
       },
       owner: json['owner'] is Map<String, dynamic>
-          ? json['owner']['email'] ?? 'Unknown' // or use json['owner']['name']
+          ? json['owner']['email'] ?? 'Unknown'
           : json['owner'] ?? 'Unknown',
     );
   }
 
-  // Convert Dart object to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -68,7 +66,7 @@ class Item {
       'image_path': image_path,
       'item_type': itemType,
       'nobg_image_path': nobg_image_path,
-      'owner': owner, 
+      'owner': owner,
     };
   }
 }

@@ -180,7 +180,7 @@ class _AdminHomeState extends State<AdminHome> {
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            _buildPieChart(), // Add Pie Chart for visual representation
+            _buildPieChart(),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

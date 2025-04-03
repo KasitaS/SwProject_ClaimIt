@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:claimitproject/backend/CallAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:claimitproject/backend/Item.dart';
@@ -94,6 +95,43 @@ class _FoundAdminItemPageState extends State<FoundAdminItemPage> {
       context,
       MaterialPageRoute(builder: (context) => AdminReceiveItemPage()),
     );
+  }
+
+  void filterItems() async {
+    List<SearchStrategy> strategies = [];
+    if (selectedCategory != 'none' && selectedCategory != null) {
+      strategies.add(CategoryFilterStrategy(selectedCategory!, 'Found'));
+    }
+    if (selectedColor != 'none' && selectedColor != null) {
+      strategies.add(ColorFilterStrategy(selectedColor!, 'Found'));
+    }
+    if (selectedLocation != 'none' && selectedLocation != null) {
+      strategies.add(LocationFilterStrategy(selectedLocation!, 'Found'));
+    }
+    CompositeSearchStrategy compositeStrategy =
+        CompositeSearchStrategy(strategies, itemType: ItemType.Found);
+    List<Item> filtered = await compositeStrategy.filterItems();
+    setState(() {
+      filteredItems = filtered;
+      displayedItems.clear();
+    });
+  }
+
+  void searchItems() async {
+    final result = await CallAPI.fetchFoundItems(searchController.text);
+
+    if (result["success"]) {
+      setState(() {
+        displayedItems = result["items"];
+      });
+    } else {
+      setState(() {
+        displayedItems = [];
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result["message"])),
+      );
+    }
   }
 
   Widget _buildDrawer() {
@@ -258,46 +296,5 @@ class _FoundAdminItemPageState extends State<FoundAdminItemPage> {
         onChanged: onChanged,
       ),
     );
-  }
-
-  void filterItems() async {
-    List<SearchStrategy> strategies = [];
-    if (selectedCategory != 'none' && selectedCategory != null) {
-      strategies.add(CategoryFilterStrategy(selectedCategory!, 'Found'));
-    }
-    if (selectedColor != 'none' && selectedColor != null) {
-      strategies.add(ColorFilterStrategy(selectedColor!, 'Found'));
-    }
-    if (selectedLocation != 'none' && selectedLocation != null) {
-      strategies.add(LocationFilterStrategy(selectedLocation!, 'Found'));
-    }
-    CompositeSearchStrategy compositeStrategy =
-        CompositeSearchStrategy(strategies, itemType: ItemType.Found);
-    List<Item> filtered = await compositeStrategy.filterItems();
-    setState(() {
-      filteredItems = filtered;
-      displayedItems.clear();
-    });
-  }
-
-  void searchItems() async {
-    Uri url = Uri.parse(
-        'http://172.20.10.5:8000/api/get_all_found_items?name=${searchController.text.trim()}');
-    String? token = await getToken();
-    final response = await http.get(url, headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'
-    });
-    if (response.statusCode == 200) {
-      setState(() {
-        displayedItems = (jsonDecode(response.body) as List)
-            .map((item) => Item.fromJson(item))
-            .toList();
-      });
-    } else {
-      setState(() {
-        displayedItems = [];
-      });
-    }
   }
 }

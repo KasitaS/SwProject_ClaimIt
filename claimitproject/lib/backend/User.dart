@@ -17,7 +17,7 @@ class User extends ItemPoster {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] ?? '', // Handle null values
+      id: json['id'] ?? '',
       username: json['username'] ?? '',
       email: json['email'] ?? '',
     );

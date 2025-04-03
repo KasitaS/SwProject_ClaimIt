@@ -13,17 +13,15 @@ class ItemTile extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white, // Set background color to white
-          borderRadius:
-              BorderRadius.circular(12), // Add border radius for curves
-          border: Border.all(color: Colors.black), // Set border color to black
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.black),
           boxShadow: [
             BoxShadow(
-              color:
-                  Colors.grey.withOpacity(0.5), // Set shadow color and opacity
-              spreadRadius: 3, // Set spread radius
-              blurRadius: 5, // Set blur radius
-              offset: Offset(0, 3), // Set shadow offset
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 5,
+              offset: Offset(0, 3),
             ),
           ],
         ),
@@ -46,13 +44,12 @@ class ItemTile extends StatelessWidget {
                       return const Icon(Icons.image_not_supported, size: 50);
                     },
                   )
-                : const Icon(Icons.image_not_supported,
-                    size: 50), // Placeholder if no image path
+                : const Icon(Icons.image_not_supported, size: 50),
           ),
           title: Text(
             item.name ?? 'Unknown Item',
             style: const TextStyle(
-              fontWeight: FontWeight.bold, // Make name text bold
+              fontWeight: FontWeight.bold,
             ),
           ),
           subtitle: Column(

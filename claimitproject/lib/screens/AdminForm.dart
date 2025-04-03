@@ -37,7 +37,7 @@ class _AdminFormState extends State<AdminForm> {
               controller: _conVerify,
               hintName: 'Enter Verification Code',
               icon: Icons.description,
-              isObscureText: true, 
+              isObscureText: true,
             ),
             const SizedBox(height: 16.0),
             ElevatedButton(
@@ -45,8 +45,7 @@ class _AdminFormState extends State<AdminForm> {
                 _validateCode();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(
-                    255, 240, 225, 207), // Set button background color
+                backgroundColor: Color.fromARGB(255, 240, 225, 207),
               ),
               child: const Text('Log in'),
             ),
@@ -57,31 +56,30 @@ class _AdminFormState extends State<AdminForm> {
   }
 
   Future<void> _validateCode() async {
-  String enteredCode = _conVerify.text.trim();
+    String enteredCode = _conVerify.text.trim();
 
-  if (enteredCode.isEmpty) {
-    _showErrorDialog('Verification Code is required.');
-    return;
-  }
-
-  try {
-    // Call API to verify admin code
-    var result = await CallAPI.verifyAdminCode(enteredCode);
-
-    if (result["success"]) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const AdminHome()),
-        (Route<dynamic> route) => false,
-      );
-    } else {
-      _showErrorDialog(result["message"] ?? 'Incorrect Verification Code. Please try again.');
+    if (enteredCode.isEmpty) {
+      _showErrorDialog('Verification Code is required.');
+      return;
     }
-  } catch (e) {
-    _showErrorDialog('An error occurred. Please try again.');
-  }
-}
 
+    try {
+      var result = await CallAPI.verifyAdminCode(enteredCode);
+
+      if (result["success"]) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminHome()),
+          (Route<dynamic> route) => false,
+        );
+      } else {
+        _showErrorDialog(result["message"] ??
+            'Incorrect Verification Code. Please try again.');
+      }
+    } catch (e) {
+      _showErrorDialog('An error occurred. Please try again.');
+    }
+  }
 
   void _showErrorDialog(String message) {
     showDialog(

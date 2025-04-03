@@ -14,10 +14,8 @@ class ItemTileD extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine if the image path is a network URL or local path
-    bool isLocalImage = item.image_path != null &&
-        item.image_path!
-            .startsWith('items/images/'); // Adjust according to your media path
+    bool isLocalImage =
+        item.image_path != null && item.image_path!.startsWith('items/images/');
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
@@ -67,8 +65,7 @@ class ItemTileD extends StatelessWidget {
                         return const Icon(Icons.image_not_supported, size: 50);
                       },
                     )
-                  : const Icon(Icons.image_not_supported,
-                      size: 50), // Placeholder if no image path
+                  : const Icon(Icons.image_not_supported, size: 50),
             ),
             title: Text(
               item.name ?? 'Unknown Item',

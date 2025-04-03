@@ -1,15 +1,11 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
+import 'package:claimitproject/backend/CallAPI.dart';
 import 'package:claimitproject/backend/Item.dart';
-import 'package:claimitproject/backend/auth_service.dart';
 import 'package:claimitproject/backend/User.dart';
 import 'package:claimitproject/screens/RecommendLost.dart';
-import 'package:claimitproject/screens/FoundUserItemPage.dart'; // Import the FoundItemsPage
-import 'package:claimitproject/screens/LoginForm.dart'; // Import LoginForm
-import 'package:claimitproject/screens/NewHomePage.dart'; // Import NewHomePage
-import 'package:claimitproject/screens/MyLostItemList.dart'; // Import My Lost Item List
+import 'package:claimitproject/screens/FoundUserItemPage.dart';
+import 'package:claimitproject/screens/LoginForm.dart';
+import 'package:claimitproject/screens/NewHomePage.dart';
 import '../ui_helper/ItemTileD.dart';
 
 class MyItemList extends StatefulWidget {
@@ -33,120 +29,33 @@ class _MyItemListState extends State<MyItemList> {
   }
 
   Future<void> fetchLostItems() async {
-    String? token = await getToken();
-
-    if (token == null) {
-      setState(() {
-        errorMessage = 'Session expired. Please log in again.';
-        isLoading = false;
-      });
-      return;
-    }
+    setState(() => isLoading = true);
 
     try {
-      final url = Uri.parse(
-          'http://172.20.10.5:8000/api/user-lost-items/${widget.user.username}/');
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-        print('API response: $data');
-
-        List<Item> loadedItems =
-            data.map((item) => Item.fromJson(item)).toList();
-
-        for (var item in loadedItems) {
-          print('Item loaded:');
-          print('Name: ${item.name}');
-          print('Category: ${item.category}');
-          print('Color: ${item.color}');
-          print('Location: ${item.location}');
-          print('Description: ${item.description}');
-          print('Image Path: ${item.image_path}');
-          print('No Background Image Path: ${item.nobg_image_path}');
-        }
-
-        setState(() {
-          itemList = loadedItems;
-          isLoading = false;
-        });
-        print('Items loaded successfully, count: ${itemList.length}');
-      } else if (response.statusCode == 401) {
-        await removeToken();
-        setState(() {
-          errorMessage = 'Session expired. Please log in again';
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          errorMessage =
-              'Failed to load items: ${response.statusCode} ${response.body}';
-          isLoading = false;
-        });
-      }
+      List<Item> items = await CallAPI.getUserLostItems(widget.user.username);
+      setState(() {
+        itemList = items;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
-        errorMessage = 'Error: ${e.toString()}';
+        errorMessage = e.toString();
         isLoading = false;
       });
     }
   }
 
   Future<void> deleteItem(Item item, int index) async {
-    String? token = await getToken();
-
-    if (token == null) {
-      setState(() {
-        errorMessage = 'Session expired. Please log in again.';
-      });
-      return;
-    }
-
     try {
-      final url = Uri.parse('http://172.20.10.5:8000/api/delete_item/');
-      final response = await http.delete(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'name': item.name,
-          'category': item.category,
-          'color': item.color,
-          'location': item.location,
-          'description': item.description,
-          'item_type': item.itemType,
-        }),
-      );
-
-      if (response.statusCode == 204) {
-        // Successfully deleted from the server, now remove from UI
-        setState(() {
-          itemList.removeAt(index);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item deleted successfully')),
-        );
-      } else if (response.statusCode == 404) {
-        setState(() {
-          errorMessage = 'Item not found.';
-        });
-      } else {
-        setState(() {
-          errorMessage = 'Failed to delete item: ${response.statusCode}';
-        });
-      }
-    } catch (e) {
+      await CallAPI.deleteItem(item);
       setState(() {
-        errorMessage = 'Error: ${e.toString()}';
+        itemList.removeAt(index);
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Item deleted successfully')),
+      );
+    } catch (e) {
+      setState(() => errorMessage = e.toString());
     }
   }
 
@@ -158,107 +67,16 @@ class _MyItemListState extends State<MyItemList> {
         backgroundColor: Color.fromARGB(255, 240, 225, 207),
         title: const Text('My Lost Items'),
         elevation: 0,
-        // Remove the leading property to eliminate the back button
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 57, 41, 21),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.person, // Choose an icon from Material Icons
-                    color: Colors.white,
-                    size: 32, // Adjust size as needed
-                  ),
-                  SizedBox(width: 10), // Space between icon and text
-                  Text(
-                    'ClaimIt',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.home, // Home icon
-                color: Colors.blue, // Set the icon color to blue
-              ),
-              title: Text('Home Page'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add navigation to the Home Page if needed
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NewHomePage(user: widget.user),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.folder, // Choose an appropriate icon for 'My Lost Items'
-                color: Colors.blue, // Set the icon color
-              ),
-              title: Text('My Lost Items'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.list, // List icon for Found Items
-                color: Colors.blue,
-              ),
-              title: Text('Found Items'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FoundUserItemPage(user: widget.user),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.logout, // Logout icon
-                color: Colors.blue,
-              ),
-              title: Text('Log Out'),
-              onTap: () {
-                _logout();
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginForm(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage != null
               ? Center(child: Text(errorMessage!))
               : itemList.isEmpty
                   ? const Center(
-                      child: Text(
-                        'No items to display',
-                        style: TextStyle(fontSize: 18.0),
-                      ),
+                      child: Text('No items to display',
+                          style: TextStyle(fontSize: 18.0)),
                     )
                   : Padding(
                       padding: const EdgeInsets.all(10.0),
@@ -287,10 +105,53 @@ class _MyItemListState extends State<MyItemList> {
     );
   }
 
-  void _logout() {
-    // Log out logic, e.g., clearing token
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => LoginForm()),
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          _buildDrawerHeader(),
+          _buildDrawerItem(Icons.home, 'Home Page', () {
+            _navigateTo(NewHomePage(user: widget.user));
+          }),
+          _buildDrawerItem(Icons.folder, 'My Lost Items', () {}),
+          _buildDrawerItem(Icons.list, 'Found Items', () {
+            _navigateTo(FoundUserItemPage(user: widget.user));
+          }),
+          _buildDrawerItem(Icons.logout, 'Log Out', _logout),
+        ],
+      ),
     );
+  }
+
+  Widget _buildDrawerHeader() {
+    return DrawerHeader(
+      decoration: BoxDecoration(color: Color.fromARGB(255, 57, 41, 21)),
+      child: Row(
+        children: [
+          Icon(Icons.person, color: Colors.white, size: 32),
+          SizedBox(width: 10),
+          Text('ClaimIt', style: TextStyle(color: Colors.white, fontSize: 24)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.blue),
+      title: Text(title),
+      onTap: onTap,
+    );
+  }
+
+  void _navigateTo(Widget page) {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
+  }
+
+  void _logout() {
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (context) => LoginForm()));
   }
 }

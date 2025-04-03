@@ -20,8 +20,8 @@ class CategoryFilterStrategy implements SearchStrategy {
     String? token = await getToken();
 
     final headers = {
-      'Authorization': 'Bearer $token', 
-      'Content-Type': 'application/json', 
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
     };
 
     final response = await http.get(url, headers: headers);

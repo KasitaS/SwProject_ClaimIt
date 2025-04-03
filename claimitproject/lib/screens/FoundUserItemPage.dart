@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:claimitproject/backend/CallAPI.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:claimitproject/backend/Item.dart';
@@ -14,10 +15,9 @@ import 'package:claimitproject/screens/MyLostItemList.dart';
 import 'package:claimitproject/backend/User.dart';
 
 class FoundUserItemPage extends StatefulWidget {
-  final User? user; // Make user optional (nullable)
+  final User? user;
 
-  const FoundUserItemPage({Key? key, this.user})
-      : super(key: key); // Use optional parameter
+  const FoundUserItemPage({Key? key, this.user}) : super(key: key);
 
   @override
   State<FoundUserItemPage> createState() => _FoundUserItemPageState();
@@ -69,7 +69,6 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Use a default user if none is provided
     User currentUser = widget.user ??
         User(id: '0', username: 'Guest', email: 'guest@example.com');
 
@@ -89,11 +88,11 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
               child: Row(
                 children: [
                   Icon(
-                    Icons.person, // Choose an icon from Material Icons
+                    Icons.person,
                     color: Colors.white,
-                    size: 32, // Adjust size as needed
+                    size: 32,
                   ),
-                  SizedBox(width: 10), // Space between icon and text
+                  SizedBox(width: 10),
                   Text(
                     'ClaimIt',
                     style: TextStyle(
@@ -106,19 +105,18 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
             ),
             ListTile(
               leading: Icon(
-                Icons.home, // Home icon
-                color: Colors.blue, // Set the icon color to blue
+                Icons.home,
+                color: Colors.blue,
               ),
               title: Text('Home Page'),
               onTap: () {
                 Navigator.pop(context);
-                // Add navigation to the Home Page if needed
               },
             ),
             ListTile(
               leading: Icon(
-                Icons.folder, // Choose an appropriate icon for 'My Lost Items'
-                color: Colors.blue, // Set the icon color
+                Icons.folder,
+                color: Colors.blue,
               ),
               title: Text('My Lost Items'),
               onTap: () {
@@ -133,7 +131,7 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
             ),
             ListTile(
               leading: Icon(
-                Icons.list, // List icon for Found Items
+                Icons.list,
                 color: Colors.blue,
               ),
               title: Text('Found Items'),
@@ -143,7 +141,7 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
             ),
             ListTile(
               leading: Icon(
-                Icons.logout, // Logout icon
+                Icons.logout,
                 color: Colors.blue,
               ),
               title: Text('Log Out'),
@@ -167,7 +165,6 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
             padding: const EdgeInsets.all(15),
             child: Row(
               children: [
-                // Show search bar only if filters are not being shown
                 if (!showFilters)
                   Expanded(
                     child: TextField(
@@ -190,10 +187,9 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
                       showFilters ? Icons.filter_list_off : Icons.filter_list),
                   onPressed: () {
                     setState(() {
-                      showFilters = !showFilters; // Toggle filter view
+                      showFilters = !showFilters;
                       if (showFilters) {
-                        displayedItems
-                            .clear(); // Clear displayed items when filtering
+                        displayedItems.clear();
                       }
                     });
                   },
@@ -212,8 +208,7 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
           ),
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            height:
-                showFilters ? 250 : 0, // Adjust height based on filter state
+            height: showFilters ? 250 : 0,
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -327,7 +322,7 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
     List<Item> filtered = await compositeStrategy.filterItems();
     setState(() {
       filteredItems = filtered;
-      displayedItems = []; // Clear displayed items when filtering
+      displayedItems = [];
     });
   }
 
@@ -335,31 +330,14 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
     if (!mounted) return;
     String searchText = searchController.text.trim().toLowerCase();
 
-    Uri url = Uri.parse(
-        'http://172.20.10.5:8000/api/get_all_found_items?name=$searchText');
+    List<Item> items = await CallAPI.getFoundItems(searchText);
 
-    String? token = await getToken();
-    final headers = {
-      'Authorization': 'Bearer $token', // Add the token to the headers
-      'Content-Type': 'application/json',
-    };
-
-    final response = await http.get(url, headers: headers);
-
-    if (response.statusCode == 200) {
-      List<dynamic> itemsData = jsonDecode(response.body);
-      setState(() {
-        displayedItems = itemsData.map((item) => Item.fromJson(item)).toList();
-      });
-    } else {
-      setState(() {
-        displayedItems = [];
-      });
-    }
+    setState(() {
+      displayedItems = items;
+    });
   }
 
   void _logout() {
-    // Implement logout functionality here, such as clearing tokens
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => LoginForm()),
     );

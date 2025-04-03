@@ -8,13 +8,12 @@ class GetTextFormField extends StatelessWidget {
   bool isObscureText;
   TextInputType? inputType;
 
-  // Constructor with all required parameters
   GetTextFormField({
     this.controller,
     this.hintName,
     this.icon,
     this.isObscureText = false,
-    this.inputType = TextInputType.text, 
+    this.inputType = TextInputType.text,
   });
 
   @override
@@ -29,7 +28,7 @@ class GetTextFormField extends StatelessWidget {
           if (value == null || value.isEmpty) {
             return 'Please enter $hintName';
           }
-          
+
           if (hintName == "Email" && !validateEmail(value)) {
             return 'Please enter a valid email';
           }

@@ -29,8 +29,7 @@ class _LoginFormState extends State<LoginForm> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              height: MediaQuery.of(context).size.height *
-                  0.30, 
+              height: MediaQuery.of(context).size.height * 0.30,
               width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -47,16 +46,14 @@ class _LoginFormState extends State<LoginForm> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    genLoginSignUpHeader(), 
+                    genLoginSignUpHeader(),
                     SizedBox(height: 10.0),
-
                     GetTextFormField(
                       controller: _emailController,
                       icon: Icons.email,
                       hintName: 'Email',
                     ),
                     SizedBox(height: 10.0),
-
                     GetTextFormField(
                       controller: _passwordController,
                       icon: Icons.lock,
@@ -64,12 +61,10 @@ class _LoginFormState extends State<LoginForm> {
                       isObscureText: true,
                     ),
                     SizedBox(height: 20.0),
-
-                    // Login Button
                     _isLoading
                         ? CircularProgressIndicator()
                         : SizedBox(
-                            width: 180, // Made button smaller
+                            width: 180,
                             child: ElevatedButton(
                               onPressed: _handleLogin,
                               style: ElevatedButton.styleFrom(
@@ -88,8 +83,6 @@ class _LoginFormState extends State<LoginForm> {
                             ),
                           ),
                     SizedBox(height: 15.0),
-
-                    // Sign Up Option
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -106,8 +99,6 @@ class _LoginFormState extends State<LoginForm> {
                         ),
                       ],
                     ),
-
-                    // Admin Login
                     TextButton(
                       child: Text('Only for Admin',
                           style: TextStyle(color: Colors.black)),

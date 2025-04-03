@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:claimitproject/backend/CallAPI.dart';
 import 'package:claimitproject/backend/Item.dart';
 import 'package:claimitproject/backend/ItemManager.dart';
 import 'package:claimitproject/backend/User.dart';
@@ -6,7 +7,7 @@ import 'package:claimitproject/ui_helper/ItemTileP.dart';
 import 'package:claimitproject/screens/UploadForm.dart';
 import 'package:claimitproject/screens/LoginForm.dart';
 import 'package:claimitproject/screens/MyLostItemList.dart';
-import 'package:claimitproject/screens/FoundUserItemPage.dart'; // Import the FoundItemsPage
+import 'package:claimitproject/screens/FoundUserItemPage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -21,8 +22,6 @@ class NewHomePage extends StatefulWidget {
 
 class _NewHomePageState extends State<NewHomePage> {
   List<Item> lostItems = [];
-  final Uri getLostItemUri =
-      Uri.parse('http://172.20.10.5:8000/api/lost-items/');
   bool itemsFetched = false;
 
   @override
@@ -32,33 +31,11 @@ class _NewHomePageState extends State<NewHomePage> {
   }
 
   Future<void> fetchLostItems() async {
-    try {
-      final response = await http.get(getLostItemUri);
-      if (response.statusCode == 200) {
-        setState(() {
-          lostItems = (json.decode(response.body) as List)
-              .map((item) => Item.fromJson(item))
-              .toList();
-          itemsFetched = true;
-        });
-
-        // Print all loaded items for debugging
-        for (var item in lostItems) {
-          print("Loaded Item: ");
-          print("Name: ${item.name}");
-          print("Image Path: ${item.image_path}");
-          print("Color: ${item.color}");
-          print("Category: ${item.category}");
-          print("Location: ${item.location}");
-          print("Description: ${item.description}");
-          print("--------------------"); // Separator for clarity
-        }
-      } else {
-        print('Failed to retrieve lost items: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching lost items: $e');
-    }
+    List<Item> items = await CallAPI.fetchLostItems();
+    setState(() {
+      lostItems = items;
+      itemsFetched = true;
+    });
   }
 
   @override
@@ -79,11 +56,11 @@ class _NewHomePageState extends State<NewHomePage> {
               child: Row(
                 children: [
                   Icon(
-                    Icons.person, // Choose an icon from Material Icons
+                    Icons.person,
                     color: Colors.white,
-                    size: 32, // Adjust size as needed
+                    size: 32,
                   ),
-                  SizedBox(width: 10), // Space between icon and text
+                  SizedBox(width: 10),
                   Text(
                     'ClaimIt',
                     style: TextStyle(
@@ -95,21 +72,12 @@ class _NewHomePageState extends State<NewHomePage> {
               ),
             ),
             ListTile(
-              leading: Icon(
-                Icons.home, // Home icon
-                color: Colors.blue, // Set the icon color to blue
-              ),
+              leading: Icon(Icons.home, color: Colors.blue),
               title: Text('Home Page'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add navigation to the Home Page if needed
-              },
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: Icon(
-                Icons.folder, // Choose an appropriate icon for 'My Lost Items'
-                color: Colors.blue, // Set the icon color
-              ),
+              leading: Icon(Icons.folder, color: Colors.blue),
               title: Text('My Lost Items'),
               onTap: () {
                 Navigator.pop(context);
@@ -122,10 +90,7 @@ class _NewHomePageState extends State<NewHomePage> {
               },
             ),
             ListTile(
-              leading: Icon(
-                Icons.list, // List icon for Found Items
-                color: Colors.blue,
-              ),
+              leading: Icon(Icons.list, color: Colors.blue),
               title: Text('Found Items'),
               onTap: () {
                 Navigator.pop(context);
@@ -138,10 +103,7 @@ class _NewHomePageState extends State<NewHomePage> {
               },
             ),
             ListTile(
-              leading: Icon(
-                Icons.logout, // Logout icon
-                color: Colors.blue,
-              ),
+              leading: Icon(Icons.logout, color: Colors.blue),
               title: Text('Log Out'),
               onTap: () {
                 _logout();
@@ -163,14 +125,12 @@ class _NewHomePageState extends State<NewHomePage> {
           children: [
             SizedBox(height: 20),
             Center(
-              // Centering the logo and greeting text
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/images/main_logo.png', // Load the logo from assets
-                    width: 100, // Set desired width for the logo
-                    height: 100, // Set desired height for the logo
+                    'assets/images/main_logo.png',
+                    width: 100,
+                    height: 100,
                   ),
                   Padding(
                     padding: EdgeInsets.all(16.0),
@@ -206,7 +166,7 @@ class _NewHomePageState extends State<NewHomePage> {
                           Padding(
                             padding: const EdgeInsets.all(15.0),
                             child: Align(
-                              alignment: Alignment.centerLeft, // Left alignment
+                              alignment: Alignment.centerLeft,
                               child: Text(
                                 'Have you seen this?',
                                 style: TextStyle(
@@ -232,12 +192,8 @@ class _NewHomePageState extends State<NewHomePage> {
                                     : ListView.builder(
                                         itemCount: lostItems.length,
                                         itemBuilder: (context, index) {
-                                          return GestureDetector(
-                                            onTap: () => _showLostItemOwner(
-                                                context, lostItems[index]),
-                                            child: ItemTileP(
-                                                item: lostItems[index]),
-                                          );
+                                          return ItemTileP(
+                                              item: lostItems[index]);
                                         },
                                       ))
                                 : Center(child: CircularProgressIndicator()),
@@ -260,8 +216,8 @@ class _NewHomePageState extends State<NewHomePage> {
                   UploadForm(itemPoster: widget.user),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
-                const begin = Offset(1.0, 0.0); // Slide from right
-                const end = Offset.zero; // Slide to the center
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
                 const curve = Curves.easeInOut;
 
                 var tween = Tween(begin: begin, end: end)
@@ -286,39 +242,5 @@ class _NewHomePageState extends State<NewHomePage> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => LoginForm()),
     );
-  }
-
-  Future<void> _showLostItemOwner(BuildContext context, Item item) async {
-    try {
-      ItemManager itemManager = ItemManager();
-      Map<String, String>? owner = await itemManager.getLostItemOwner(item);
-
-      if (owner != null) {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Lost Item Owner'),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Name: ${owner['username'] ?? 'Unknown'}'),
-                  Text('Email: ${owner['email'] ?? 'Unknown'}'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Close'),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } catch (e) {
-      print('Error showing lost item owner dialog: $e');
-    }
   }
 }

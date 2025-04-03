@@ -301,8 +301,6 @@ class _UploadFormState extends State<UploadForm> {
         _conName.text.isEmpty ||
         _conDescription.text.isEmpty ||
         selectedColors.isEmpty) {
-      // Ensure at least one color is selected
-      // Display an error message or alert the user about missing information
       return;
     }
     setState(() {
@@ -367,8 +365,8 @@ class _UploadFormState extends State<UploadForm> {
             actions: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                  Navigator.of(context).pop(); // Go back to the previous page
+                  Navigator.of(context).pop(); 
+                  Navigator.of(context).pop(); 
                 },
                 child: Text('OK'),
               ),

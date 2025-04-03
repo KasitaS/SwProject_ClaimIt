@@ -20,7 +20,7 @@ class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
   @override
   void initState() {
     super.initState();
-    fetchReceivedItems(); // Fetch items when the widget is initialized
+    fetchReceivedItems();
   }
 
   Future<void> fetchReceivedItems() async {
@@ -33,7 +33,7 @@ class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
       });
     } else {
       setState(() {
-        itemsFetched = true; 
+        itemsFetched = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result["message"])),

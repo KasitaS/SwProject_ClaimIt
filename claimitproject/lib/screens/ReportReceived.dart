@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:claimitproject/backend/Item.dart';
 import 'package:claimitproject/ui_helper/ItemTile.dart';
-import 'package:claimitproject/backend/auth_service.dart';
+import 'package:claimitproject/backend/CallAPI.dart';
 
 class ReportReceived extends StatefulWidget {
   const ReportReceived({super.key});
@@ -86,7 +84,6 @@ class _ReportReceivedState extends State<ReportReceived> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("Category: ${item.category}"),
-                        // Text("Color: ${item.color ?? 'Unknown'}"),
                         Text("Location: ${item.location ?? 'Unknown'}"),
                       ],
                     ),
@@ -114,21 +111,12 @@ class _ReportReceivedState extends State<ReportReceived> {
 
   void searchItems() async {
     String searchText = searchController.text.trim().toLowerCase();
-    Uri url = Uri.parse(
-        'http://172.20.10.5:8000/api/get_all_found_items?name=$searchText');
-    String? token = await getToken();
-    final headers = {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'
-    };
-
-    final response = await http.get(url, headers: headers);
-    if (response.statusCode == 200) {
-      List<dynamic> itemsData = jsonDecode(response.body);
+    try {
+      List<Item> items = await CallAPI.fetch_FoundItems(searchText);
       setState(() {
-        displayedItems = itemsData.map((item) => Item.fromJson(item)).toList();
+        displayedItems = items;
       });
-    } else {
+    } catch (e) {
       setState(() {
         displayedItems = [];
       });
@@ -168,24 +156,15 @@ class _ReportReceivedState extends State<ReportReceived> {
   }
 
   void updateItemReceived(Item item) async {
-    Uri url = Uri.parse(
-        'http://172.20.10.5:8000/api/update_item_received/${item.id}/');
-    String? token = await getToken();
-    final headers = {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'
-    };
-    final body = jsonEncode({'item_type': 'Received'});
-
-    final response = await http.put(url, headers: headers, body: body);
-    if (response.statusCode == 200) {
+    try {
+      await CallAPI.updateItemReceived(item.id);
       setState(() {
         displayedItems.remove(item);
       });
       Navigator.pop(context);
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Item marked as received!')));
-    } else {
+    } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to update item')));
     }

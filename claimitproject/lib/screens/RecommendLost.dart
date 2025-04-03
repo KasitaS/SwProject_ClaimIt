@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
 import '../backend/Item.dart';
 import '../ui_helper/ItemTile.dart';
+import '../backend/CallAPI.dart'; // Import CallAPI
 
 class RecommendLostPage extends StatefulWidget {
   final Item item;
@@ -16,10 +14,6 @@ class RecommendLostPage extends StatefulWidget {
 }
 
 class _RecommendLostPageState extends State<RecommendLostPage> {
-  final String apiUrl =
-      'http://172.20.10.5:8000/api/found-items/'; // Django API endpoint
-  final String fastApiUrl =
-      'http://172.20.10.5:8001/image_similarity/'; // FastAPI endpoint
   List<Item> filteredItems = [];
   bool isLoading = true;
   String? errorMessage;
@@ -31,34 +25,17 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
   }
 
   Future<void> fetchRecommendedItems() async {
-    final Uri requestUri = Uri.parse(
-        '$apiUrl?category=${widget.item.category}&location=${widget.item.location}');
-
     try {
-      final response = await http.get(requestUri);
+      List<Item> foundItems = await CallAPI.fetchRecommendedItems(widget.item);
 
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-        List<Item> foundItems =
-            data.map((jsonItem) => Item.fromJson(jsonItem)).toList();
+      await compareImages(foundItems);
 
-        // Compare images and filter based on similarity
-        print(foundItems);
-        await compareImages(foundItems);
-
-        print('here');
-        setState(() {
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          errorMessage = 'Failed to fetch items';
-          isLoading = false;
-        });
-      }
+      setState(() {
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
-        errorMessage = 'Error: $e';
+        errorMessage = e.toString();
         isLoading = false;
       });
     }
@@ -68,14 +45,14 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
     List<Item> similarItems = [];
 
     for (var foundItem in foundItems) {
-      // Check if the image path for both images is not null and not empty
       if (widget.item.nobg_image_path != null &&
           widget.item.nobg_image_path!.isNotEmpty &&
           foundItem.nobg_image_path != null &&
           foundItem.nobg_image_path!.isNotEmpty) {
-        double similarityScore = await getSimilarity(
-            'http://172.20.10.5:8000/api/get_image_file/?image_path=${(widget.item.nobg_image_path!)}', // Get image URL for lost item
-            'http://172.20.10.5:8000/api/get_image_file/?image_path=${foundItem.nobg_image_path!}'); // Get image URL for found item
+        double similarityScore = await CallAPI.getImageSimilarity(
+          'http://172.20.10.5:8000/api/get_image_file/?image_path=${Uri.encodeComponent(widget.item.nobg_image_path!)}',
+          'http://172.20.10.5:8000/api/get_image_file/?image_path=${Uri.encodeComponent(foundItem.nobg_image_path!)}',
+        );
 
         if (similarityScore > 0.70) {
           similarItems.add(foundItem);
@@ -84,39 +61,8 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
     }
 
     setState(() {
-      filteredItems = similarItems; // Update the filtered items
+      filteredItems = similarItems;
     });
-  }
-
-  Future<double> getSimilarity(
-      String lostItemImageUrl, String foundItemImageUrl) async {
-    try {
-      // Fetch the images from the provided URLs
-      var lostImageResponse = await http.get(Uri.parse(lostItemImageUrl));
-      var foundImageResponse = await http.get(Uri.parse(foundItemImageUrl));
-
-      if (lostImageResponse.statusCode == 200 &&
-          foundImageResponse.statusCode == 200) {
-        // Prepare the request for similarity comparison
-        var request = http.MultipartRequest("POST", Uri.parse(fastApiUrl));
-        request.files.add(http.MultipartFile.fromBytes(
-            "file1", lostImageResponse.bodyBytes,
-            filename: "lost.png"));
-        request.files.add(http.MultipartFile.fromBytes(
-            "file2", foundImageResponse.bodyBytes,
-            filename: "found.png"));
-
-        var response = await request.send();
-        var responseData = await response.stream.bytesToString();
-        var jsonData = json.decode(responseData);
-
-        return jsonData["similarity_score"]
-            [0]; // Assuming the response structure has similarity_score
-      }
-    } catch (e) {
-      print("Error getting similarity: $e");
-    }
-    return 0.0; // Return low similarity if error occurs
   }
 
   @override
