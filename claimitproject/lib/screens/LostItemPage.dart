@@ -56,6 +56,9 @@ class _LostItemPageState extends State<LostItemPage> {
 
   void clearFilters() {
     setState(() {
+      selectedCategory = null;
+      selectedColor = null;
+      selectedLocation = null;
       loadLostItems();
     });
   }
