@@ -22,16 +22,17 @@ class ItemManager extends ItemPoster {
     return await CallAPI.getItemCounts();
   }
 
-  Future<List<Item>> compareImages(Item lostItem, List<Item> foundItems) async {
+  Future<List<Item>> compareImages(Item lostItem, List<Item> foundItems, String? nobg_image) async {
     List<Item> similarItems = [];
+    print(foundItems.length);
     for (var foundItem in foundItems) {
-      if (lostItem.nobg_image_path != null &&
-          lostItem.nobg_image_path!.isNotEmpty &&
-          foundItem.nobg_image_path != null &&
-          foundItem.nobg_image_path!.isNotEmpty) {
+      print(foundItem.nobg_image_path);
+      if (foundItem.nobg_image_path?.isNotEmpty == true) {
         double similarityScore = await CallAPI.getSimilarity(
-            'http://172.20.10.5:8000/api/get_image_file/?image_path=${lostItem.nobg_image_path!}',
+            'http://172.20.10.5:8000/api/get_image_file/?image_path=${nobg_image!}',
             'http://172.20.10.5:8000/api/get_image_file/?image_path=${foundItem.nobg_image_path!}');
+
+        print(similarityScore);
 
         if (similarityScore > 0.70) {
           similarItems.add(foundItem);
@@ -42,23 +43,22 @@ class ItemManager extends ItemPoster {
   }
 
   @override
-  Future<void> findSimilarityAndNotify(Item newItem) async {
-    List<Item> similarItems = await CallAPI.findSimilarItems(newItem);
+  Future<void> findSimilarityAndNotify(Item newItem, String? nobg_image) async {
+    List<Item> lostItems = await CallAPI.fetchLostItemsByCategoryAndLocation(newItem.category, newItem.location);
+    List<Item> similarItems = await compareImages(newItem, lostItems, nobg_image);
 
+    print(similarItems.length);
     if (similarItems.isNotEmpty) {
-      String recipientEmail = 'user@example.com'; 
-      String subject = 'Similar Lost Item Found!';
-      String body = 'We found items similar to yours:\n\n';
 
-      for (var item in similarItems) {
-        body += 'Name: ${item.name}, Location: ${item.location}\n';
+      for (var s in similarItems) {
+        String recipientEmail = s.owner ?? 'Unknown';
+        String subject = 'Someone has recently found this?';
+        String body = 'Is this yours? If so, please come pick up at Lost and Found:\n\n';
+        body += 'Name: ${s.name}, Location: ${s.location}\n';
+
+        EmailSender emailSender = EmailSender(username: 'gkasita.sst@gmail.com', password: 'nrjo eoym wwit ljym');
+        await emailSender.sendEmail(recipientEmail, subject, body, newItem.nobg_image_path!);
       }
-
-      EmailSender emailSender = EmailSender(
-          username: 'gkasita.sst@gmail.com', password: 'nrjo eoym wwit ljym');
-
-      await emailSender.sendEmail(
-          recipientEmail, subject, body, newItem.nobg_image_path!);
     }
   }
 

@@ -31,8 +31,10 @@ class User extends ItemPoster {
     };
   }
 
-  Future<void> findSimilarityAndNotify(Item newItem) {
+  Future<void> findSimilarityAndNotify(Item newItem, String? nobg_image_path) {
     throw UnimplementedError(
         'findSimilarityAndNotify() has not been implemented.');
   }
+
+
 }

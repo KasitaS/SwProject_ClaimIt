@@ -13,15 +13,17 @@ class ReportReceived extends StatefulWidget {
 class _ReportReceivedState extends State<ReportReceived> {
   late List<Item> displayedItems = [];
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController claimerNameController = TextEditingController();
+  final TextEditingController claimerEmailController = TextEditingController();
   bool showFilters = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Found Items',
+        title: const Text('Record Received Items',
             style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.green.shade300,
         centerTitle: true,
       ),
       body: Column(
@@ -38,7 +40,7 @@ class _ReportReceivedState extends State<ReportReceived> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      prefixIcon: const Icon(Icons.search, color: Colors.teal),
+                      prefixIcon: const Icon(Icons.search, color: Color.fromARGB(255, 136, 218, 209)),
                     ),
                     onChanged: (value) {
                       searchItems();
@@ -136,6 +138,14 @@ class _ReportReceivedState extends State<ReportReceived> {
               Text("Name: ${item.name}"),
               Text("Category: ${item.category}"),
               Text("Location: ${item.location ?? 'Unknown'}"),
+              TextField(
+                controller: claimerNameController,
+                decoration: InputDecoration(labelText: 'Claimer Name'),
+              ),
+              TextField(
+                controller: claimerEmailController,
+                decoration: InputDecoration(labelText: 'Claimer Email'),
+              ),
             ],
           ),
           actions: [
@@ -155,9 +165,12 @@ class _ReportReceivedState extends State<ReportReceived> {
     );
   }
 
-  void updateItemReceived(Item item) async {
+   void updateItemReceived(Item item) async {
+    String claimerName = claimerNameController.text.trim();
+    String claimerEmail = claimerEmailController.text.trim();
+
     try {
-      await CallAPI.updateItemReceived(item.id);
+      await CallAPI.updateItemReceived(item.id, claimerName, claimerEmail);
       setState(() {
         displayedItems.remove(item);
       });

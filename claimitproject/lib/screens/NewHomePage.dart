@@ -102,6 +102,7 @@ class _NewHomePageState extends State<NewHomePage> {
                 );
               },
             ),
+            Divider(),
             ListTile(
               leading: Icon(Icons.logout, color: Colors.blue),
               title: Text('Log Out'),

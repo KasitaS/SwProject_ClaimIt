@@ -139,6 +139,7 @@ class _FoundUserItemPageState extends State<FoundUserItemPage> {
                 Navigator.pop(context);
               },
             ),
+            Divider(),
             ListTile(
               leading: Icon(
                 Icons.logout,

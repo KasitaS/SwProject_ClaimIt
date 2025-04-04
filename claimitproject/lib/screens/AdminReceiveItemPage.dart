@@ -1,5 +1,9 @@
 import 'dart:convert';
 import 'package:claimitproject/backend/CallAPI.dart';
+import 'package:claimitproject/screens/AdminHomePage.dart';
+import 'package:claimitproject/screens/FoundAdminItemPage.dart';
+import 'package:claimitproject/screens/LoginForm.dart';
+import 'package:claimitproject/screens/LostItemPage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../backend/auth_service.dart';
@@ -47,8 +51,85 @@ class _AdminReceiveItemPageState extends State<AdminReceiveItemPage> {
       appBar: AppBar(
         title: const Text('Received Items',
             style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Color.fromARGB(255, 240, 225, 207),
         centerTitle: true,
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.brown,
+              ),
+              child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.admin_panel_settings, size: 40, color: Colors.white),
+                SizedBox(height: 10),
+                Text(
+                  'Admin Panel',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.dashboard, color: Colors.blue),
+              title: const Text('Dashboard'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AdminHome()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.list, color: Colors.blue),
+              title: const Text('Found Items'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FoundAdminItemPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.search, color: Colors.blue,),
+              title: const Text('Lost Items'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LostItemPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_circle, color: Colors.blue),
+              title: const Text('Received Items'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AdminReceiveItemPage()),
+                );
+              },
+            ),
+            Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.blue,),
+              title: const Text('Logout'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginForm()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: itemsFetched
           ? (receivedItems.isEmpty

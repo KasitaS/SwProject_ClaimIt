@@ -118,6 +118,7 @@ class _MyItemListState extends State<MyItemList> {
           _buildDrawerItem(Icons.list, 'Found Items', () {
             _navigateTo(FoundUserItemPage(user: widget.user));
           }),
+          Divider(),
           _buildDrawerItem(Icons.logout, 'Log Out', _logout),
         ],
       ),

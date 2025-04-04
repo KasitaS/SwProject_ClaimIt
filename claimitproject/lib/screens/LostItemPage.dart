@@ -1,3 +1,7 @@
+import 'package:claimitproject/screens/AdminHomePage.dart';
+import 'package:claimitproject/screens/AdminReceiveItemPage.dart';
+import 'package:claimitproject/screens/FoundAdminItemPage.dart';
+import 'package:claimitproject/screens/LoginForm.dart';
 import 'package:flutter/material.dart';
 import 'package:claimitproject/backend/Item.dart';
 import 'package:claimitproject/backend/ItemManager.dart';
@@ -110,7 +114,96 @@ class _LostItemPageState extends State<LostItemPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Lost Items')),
+      appBar: AppBar(
+        title: Text('Lost Items'),
+        backgroundColor: Color.fromARGB(255, 240, 225, 207),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.brown,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.admin_panel_settings,
+                      size: 40, color: Colors.white),
+                  SizedBox(height: 10),
+                  Text(
+                    'Admin Panel',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.dashboard, color: Colors.blue),
+              title: const Text('Dashboard'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AdminHome()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.list, color: Colors.blue),
+              title: const Text('Found Items'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const FoundAdminItemPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.search,
+                color: Colors.blue,
+              ),
+              title: const Text('Lost Items'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LostItemPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_circle, color: Colors.blue),
+              title: const Text('Received Items'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AdminReceiveItemPage()),
+                );
+              },
+            ),
+            Divider(),
+            ListTile(
+              leading: const Icon(
+                Icons.logout,
+                color: Colors.blue,
+              ),
+              title: const Text('Logout'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginForm()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: Padding(
         padding: EdgeInsets.all(10),
         child: Column(
@@ -175,7 +268,7 @@ class _LostItemPageState extends State<LostItemPage> {
                           child: ElevatedButton(
                             onPressed: filterItems,
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange),
+                                backgroundColor: Colors.orange.shade300),
                             child: Text('Filter'),
                           ),
                         ),
@@ -184,7 +277,7 @@ class _LostItemPageState extends State<LostItemPage> {
                           child: ElevatedButton(
                             onPressed: clearFilters,
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.redAccent),
+                                backgroundColor: Colors.blueGrey.shade300),
                             child: Text('Clear'),
                           ),
                         ),
@@ -222,7 +315,8 @@ class _LostItemPageState extends State<LostItemPage> {
                                 Text("Category: ${currentItem.category}"),
                                 Text("Color: ${currentItem.color}"),
                                 Text("Location: ${currentItem.location}"),
-                                Text("Posted by: ${currentItem.owner ?? 'Unknown'}",
+                                Text(
+                                    "Posted by: ${currentItem.owner ?? 'Unknown'}",
                                     style: TextStyle(
                                         color: Colors.blue,
                                         fontWeight: FontWeight.bold)),

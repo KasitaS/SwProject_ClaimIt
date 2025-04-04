@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:claimitproject/backend/Item.dart';
-import 'package:http/http.dart' as http;
-import 'package:claimitproject/backend/User.dart';
+some import 'package:claimitproject/backend/User.dart';
 import 'package:claimitproject/backend/auth_service.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -312,20 +311,27 @@ class CallAPI {
     }
   }
 
-  static Future<void> updateItemReceived(int? itemId) async {
-    Uri url = Uri.parse('$_mainUrl/update_item_received/$itemId/');
-    String? token = await getToken();
-    final headers = {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'
-    };
-    final body = jsonEncode({'item_type': 'Received'});
+  static Future<void> updateItemReceived(int? itemId, String claimerName, String claimerEmail) async {
+  Uri url = Uri.parse('$_mainUrl/update_item_received/$itemId/');
+  String? token = await getToken();
+  final headers = {
+    'Authorization': 'Bearer $token',
+    'Content-Type': 'application/json'
+  };
+  
+  
+  final body = jsonEncode({
+    'item_type': 'Received',
+    'claimer_name': claimerName,
+    'claimer_email': claimerEmail
+  });
 
-    final response = await http.put(url, headers: headers, body: body);
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update item');
-    }
+  final response = await http.put(url, headers: headers, body: body);
+  if (response.statusCode != 200) {
+    throw Exception('Failed to update item');
   }
+}
+
 
   static Future<List<Item>> fetch_FoundItems(String searchText) async {
     Uri url = Uri.parse('$_mainUrl/get_all_found_items?name=$searchText');
@@ -341,91 +347,6 @@ class CallAPI {
       return itemsData.map((item) => Item.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load items');
-    }
-  }
-
-  static Future<void> postItem(Item newItem) async {
-    final url = Uri.parse('$_mainUrl/api/items/');
-    final token = await getToken();
-
-    if (token == null) {
-      print('No authentication token found. Please log in again.');
-      return;
-    }
-
-    try {
-      var request = http.MultipartRequest('POST', url);
-      request.headers['Authorization'] = "Bearer $token";
-
-      request.fields['name'] = newItem.name;
-      request.fields['category'] = newItem.category;
-      request.fields['color'] = newItem.color;
-      request.fields['location'] = newItem.location;
-      request.fields['item_type'] = newItem.itemType;
-      request.fields['description'] = newItem.description;
-
-      if (newItem.image_path != null && newItem.image_path!.isNotEmpty) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'image_path',
-            newItem.image_path!,
-            contentType: MediaType('image', 'jpeg'),
-          ),
-        );
-      }
-
-      if (newItem.nobg_image_path != null &&
-          newItem.nobg_image_path!.isNotEmpty) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'nobg_image_path',
-            newItem.nobg_image_path!,
-            contentType: MediaType('image', 'png'),
-          ),
-        );
-      }
-
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 201) {
-        print('Item uploaded successfully');
-        await findSimilarityAndNotify(newItem);
-      } else {
-        print(
-            'Failed to upload item: ${response.statusCode} - ${response.body}');
-      }
-    } catch (error) {
-      print('Error occurred: $error');
-    }
-  }
-
-  static Future<void> findSimilarityAndNotify(Item newItem) async {
-    final url = Uri.parse('$_mainUrl/api/find_similar_items/');
-    final token = await getToken();
-
-    if (token == null) {
-      print('No authentication token found. Please log in again.');
-      return;
-    }
-
-    final headers = {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json'
-    };
-
-    final body = jsonEncode({'item_id': newItem.id});
-
-    try {
-      final response = await http.post(url, headers: headers, body: body);
-      if (response.statusCode == 200) {
-        print('Similarity check completed and users notified.');
-      } else {
-        print(
-            'Failed to find similarity: ${response.statusCode} - ${response.body}');
-      }
-    } catch (error) {
-      print('Error occurred: $error');
     }
   }
 
@@ -458,7 +379,7 @@ class CallAPI {
       if (lostImageResponse.statusCode == 200 &&
           foundImageResponse.statusCode == 200) {
         var request = http.MultipartRequest(
-            "POST", Uri.parse('$fastApiUrl/image_similarity/'));
+            "POST", Uri.parse('http://172.20.10.5:8001/image_similarity/'));
         request.files.add(http.MultipartFile.fromBytes(
             "file1", lostImageResponse.bodyBytes,
             filename: "lost.png"));
@@ -470,7 +391,7 @@ class CallAPI {
         var responseData = await response.stream.bytesToString();
         var jsonData = json.decode(responseData);
 
-        return jsonData["similarity_score"];
+        return jsonData["similarity_score"][0];
       }
     } catch (e) {
       print("Error getting similarity: $e");
@@ -478,37 +399,15 @@ class CallAPI {
     return 0.0;
   }
 
-  static Future<List<Item>> findSimilarItems(Item newItem) async {
-    final String apiUrl =
-        '$_mainUrl/api/lost-items/?category=${newItem.category}&location=${newItem.location}';
-    List<Item> similarItems = [];
-
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        List<Item> lostItems = (json.decode(response.body) as List)
-            .map((jsonItem) => Item.fromJson(jsonItem))
-            .toList();
-
-        for (var lostItem in lostItems) {
-          if (newItem.nobg_image_path != null &&
-              newItem.nobg_image_path!.isNotEmpty &&
-              lostItem.nobg_image_path != null &&
-              lostItem.nobg_image_path!.isNotEmpty) {
-            double similarityScore = await getSimilarity(
-                '$_mainUrl/api/get_image_file/?image_path=${newItem.nobg_image_path!}',
-                '$_mainUrl/api/get_image_file/?image_path=${lostItem.nobg_image_path!}');
-
-            if (similarityScore > 0.70) {
-              similarItems.add(lostItem);
-            }
-          }
-        }
-      }
-    } catch (e) {
-      print('Error fetching lost items: $e');
+  static Future<List<Item>> fetchLostItemsByCategoryAndLocation(
+      String category, String location) async {
+    final response = await http.get(
+        Uri.parse('$_mainUrl/lost-items/?category=$category&location=$location'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((jsonItem) => Item.fromJson(jsonItem)).toList();
     }
-    return similarItems;
+    throw Exception('Failed to fetch lost items by category and location');
   }
 
   static Future<String?> refreshAccessToken() async {

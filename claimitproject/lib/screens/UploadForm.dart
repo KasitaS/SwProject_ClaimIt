@@ -100,7 +100,6 @@ class _UploadFormState extends State<UploadForm> {
                       ],
                     ),
                     SizedBox(height: 16),
-                    // Horizontal scrollable list of color buttons
                     Container(
                       height: 50,
                       child: ListView.builder(
@@ -230,15 +229,14 @@ class _UploadFormState extends State<UploadForm> {
         });
 
         String detectedObject = await APIService.instance
-            .getDetected(pickedFile.path); // Pass the file path
+            .getDetected(pickedFile.path); 
         String cleanedDetectedObject = detectedObject.substring(1);
 
-        // Remove the last two characters
         cleanedDetectedObject = cleanedDetectedObject.substring(
             1, cleanedDetectedObject.length - 2);
 
         print('Detected Object: $cleanedDetectedObject');
-        _conName.text = cleanedDetectedObject; // Update name field
+        _conName.text = cleanedDetectedObject; 
       } else {
         print('No image selected.');
       }
@@ -256,16 +254,15 @@ class _UploadFormState extends State<UploadForm> {
           _selectedImage = File(pickedFile.path);
         });
         String detectedObject = await APIService.instance
-            .getDetected(pickedFile.path); // Pass the file path
+            .getDetected(pickedFile.path); 
 
         String cleanedDetectedObject = detectedObject.substring(1);
 
-        // Remove the last two characters
         cleanedDetectedObject = cleanedDetectedObject.substring(
             1, cleanedDetectedObject.length - 2);
 
         print('Detected Object: $cleanedDetectedObject');
-        _conName.text = cleanedDetectedObject; // Update name field
+        _conName.text = cleanedDetectedObject; 
       } else {
         print('No image selected from camera.');
       }
@@ -277,19 +274,19 @@ class _UploadFormState extends State<UploadForm> {
   Future<String> _saveImageLocally(Uint8List imageBytes) async {
     try {
       final directory =
-          await getApplicationDocumentsDirectory(); // Get app's storage directory
+          await getApplicationDocumentsDirectory();
       String uniqueFilename =
-          'image_${DateTime.now().millisecondsSinceEpoch}.png'; // Generate unique filename
+          'image_${DateTime.now().millisecondsSinceEpoch}.png'; 
       final filePath =
-          '${directory.path}/$uniqueFilename'; // Construct full file path
+          '${directory.path}/$uniqueFilename'; 
 
       File file = File(filePath);
-      await file.writeAsBytes(imageBytes); // Write bytes to file
+      await file.writeAsBytes(imageBytes); 
 
-      return filePath; // Return saved file path
+      return filePath; 
     } catch (e) {
       print("Error saving image: $e");
-      return ''; // Return empty string in case of error
+      return '';
     }
   }
 
@@ -304,20 +301,20 @@ class _UploadFormState extends State<UploadForm> {
       return;
     }
     setState(() {
-      isLoading = true; // Start loading
+      isLoading = true; 
     });
 
     String itemType = widget.itemPoster.runtimeType == User ? 'Lost' : 'Found';
     Uint8List bgRemovedImage =
         await APIService.instance.remove_bg(_selectedImage!.path);
     String nobgImagePath =
-        await _saveImageLocally(bgRemovedImage); // No filename needed
+        await _saveImageLocally(bgRemovedImage); 
 
     Item item = Item(
       name: _conName.text,
       category: selectedCategory ?? 'Unknown',
       location: selectedLocation ?? 'Unknown',
-      color: selectedColors.join(', '), // Join selected colors into a string
+      color: selectedColors.join(', '), 
       description: _conDescription.text,
       image_path: _selectedImage!.path,
       itemType: itemType,
@@ -329,12 +326,12 @@ class _UploadFormState extends State<UploadForm> {
       _showSuccessDialog();
       print('Item uploaded successfully');
       setState(() {
-        isLoading = false; // Stop loading on error
+        isLoading = false; 
       });
     } catch (e) {
       print('Error uploading item: $e');
       setState(() {
-        isLoading = false; // Stop loading on error
+        isLoading = false;
       });
     }
   }

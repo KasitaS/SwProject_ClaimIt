@@ -68,7 +68,7 @@ class _RecommendLostPageState extends State<RecommendLostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Recommended Items')),
+      appBar: AppBar(title: Text('Recommended Items'), backgroundColor: Color.fromARGB(255, 240, 225, 207)),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage != null

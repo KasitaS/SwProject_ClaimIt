@@ -99,9 +99,21 @@ class _LoginFormState extends State<LoginForm> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 10.0), 
+                    
+                    Divider(thickness: 1, color: Colors.grey), // Separator
+
+                    SizedBox(height: 10.0), 
+
+                    // Admin Access Button with Red Accent
                     TextButton(
-                      child: Text('Only for Admin',
-                          style: TextStyle(color: Colors.black)),
+                      child: Text(
+                        'Admin Access',
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
